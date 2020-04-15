@@ -17,6 +17,6 @@ ${CPPCHECK} project --enable=all --error-exitcode=1 -I project/headers --suppres
 
 
 print_header "RUN cpplint.py"
-python2.7 ./linters/cpplint/cpplint.py --linelength=120 --extensions=c,cpp --headers=h,hpp--filter=-runtime/references,-legal/copyright,-build/include_subdir,-whitespace/line_length project/headers/* project/src/*
+python2.7 ./linters/cpplint/cpplint.py --linelength=120 --extensions=c,cpp --headers=h,hpp--filter=-runtime/references,-legal/copyright,-build/include_subdir,-whitespace/line_length project/headers/* project/src/* project/tests/*
 
 print_header "SUCCESS"
