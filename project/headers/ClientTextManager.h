@@ -5,11 +5,12 @@
 #ifndef CODESHARE_CLIENTTEXTMANAGER_H
 #define CODESHARE_CLIENTTEXTMANAGER_H
 
+#include "TextManager.h"
 #include <string>
 #include "TextDiff.h"
 #include <map>
 
-class ClientTextManager {
+class ClientTextManager : public TextManager {
 public:
     ClientTextManager();
     std::map<TextDiff, int> formDiff(std::string a, std::string b);
