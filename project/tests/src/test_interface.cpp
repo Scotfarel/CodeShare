@@ -9,17 +9,43 @@
 #include "ChatRoom.h"
 #include "MongoConnector.h"
 #include "RoomManager.h"
+#include "RoomTextManager.h"
+#include "TextManger.h"
 
+using ::testing::AtLeast;
+using ::testing::DoAll;
+using ::testing::Return;
+using ::testing::SetArgReferee;
 
 using namespace std;
 
-TEST(Initialization, InitCorrect) {
-    EXPECT_TRUE(true);
-}
-RoomManager;
-
-
-class _RoomManager {
+class MockChatRoom : public ChatRoom<RoomTextManager> {
 public:
-    MOCK_METHOD0()
+    MockChatRoom()= default;
+    MOCK_METHOD0(addUser, std::string());
+    MOCK_METHOD0(getText, std::string());
+    MOCK_METHOD0(createDbTask, bool());
 };
+
+TEST(MockTest, RoomManagerTest) {
+    MockChatRoom room;
+    EXPECT_CALL(room, addUser()).Times(AtLeast(1));
+
+    RoomManager<MockChatRoom> manager;
+    manager.connectToRoom(&room);
+}
+
+class MockRoomTextManager : public RoomTextManager {
+public:
+    MockRoomTextManager()= default;
+    MOCK_METHOD0(getString, std::string());
+};
+
+TEST(MockTest, TextManagerTest) {
+    MockRoomTextManager manager;
+    EXPECT_CALL(manager, getString()).Times(AtLeast(1));
+
+    ChatRoom<MockRoomTextManager> room;
+    room.getText(&manager);
+}
+
