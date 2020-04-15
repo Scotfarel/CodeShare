@@ -81,14 +81,11 @@ endif()
 add_executable(Tests
         src/main.cpp
         src/test_interface.cpp
-#        ../src/ChatRoom.cpp
-#        ../src/RoomManager.cpp
-#        ../src/MongoConnector.cpp
-        )
+        ../src/RoomTextManager.cpp)
 
 set_target_properties(Tests PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
 
-target_link_libraries(Tests ${GTEST_BOTH_LIBRARIES} ${GMOCK_BOTH_LIBRARIES} project_lib)
+target_link_libraries(Tests project_lib ${GTEST_BOTH_LIBRARIES} ${GMOCK_BOTH_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
 add_test(
         NAME BaseTest
