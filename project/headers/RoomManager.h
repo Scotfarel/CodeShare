@@ -10,17 +10,31 @@
 
 #include <ChatRoom.h>
 
-
+template <class ChatRoomInterface>
 class RoomManager {
 public:
-    RoomManager();
-    ChatRoom* createRoom();
-    ChatRoom* getRoom(int id);
-    bool connectToRoom(int id);
-    void deleteRoom(int id);
+    RoomManager() = default;
+    ~RoomManager() = default;
+    ChatRoomInterface* createRoom(int id) { return nullptr; };
+    ChatRoomInterface* getRoom(int id);
+    bool connectToRoom(ChatRoomInterface* room);
+    void deleteRoom(int id) {};
 
 private:
-    std::vector<ChatRoom> roomsContainer;
+    std::vector<ChatRoomInterface* > roomsContainer;
 };
+
+template<class ChatRoomInterface>
+bool RoomManager<ChatRoomInterface>::connectToRoom(ChatRoomInterface *room) {
+    room->addUser();
+    roomsContainer.push_back(room);
+    return true;
+}
+
+template<class ChatRoomInterface>
+ChatRoomInterface* RoomManager<ChatRoomInterface>::getRoom(int id) {
+    return roomsContainer[id];
+}
+
 
 #endif //CODESHARE_ROOMMANAGER_H
