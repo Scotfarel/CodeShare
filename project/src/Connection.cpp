@@ -1,6 +1,6 @@
 #include "Connection.hpp"
 
-Connection::Connection() {}
+Connection::Connection() = default;
 
 void Connection::start() {
     std::cout << "start" << std::endl;

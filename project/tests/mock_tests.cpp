@@ -6,6 +6,7 @@
 #include "Server.hpp"
 #include "Connection.hpp"
 #include "ConnectionManager.hpp"
+#include "RequestHandler.hpp"
 
 using ::testing::AtLeast;
 using ::testing::DoAll;
