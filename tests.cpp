@@ -10,19 +10,20 @@ using ::testing::SetArgReferee;
 
 
 
-class MockRoomTextManager : public RoomTextManager {
+class MockRoomTextManager : public RoomTextManager<std::string> {
 public:
-    MOCK_METHOD1(addDiff, bool(TextDiff a));
+    MOCK_METHOD1(addDiff, bool(std::string a));
     MOCK_METHOD0(getString, void());
-    MOCK_METHOD0(getDiff, TextDiff());
-    MOCK_METHOD2(formDiff, std::map<TextDiff, int>(std::string cur, std::string prev));
+    MOCK_METHOD0(getDiff, std::string());
+    MOCK_METHOD2(formDiff, std::map<std::string, int>(std::string cur, std::string prev));
 };
 
 
-class MockClientTextManager : public ClientTextManager {
-    MOCK_METHOD2(updateText, bool(std::string a, std::map<TextDiff, int>));
+class MockClientTextManager : public ClientTextManager<std::string> {
+public:
+    MOCK_METHOD2(updateText, bool(std::string a, std::string diff));
     MOCK_METHOD0(getString, void());
-    MOCK_METHOD2(formDiff, std::map<TextDiff, int>(std::string cur, std::string prev));
+    MOCK_METHOD2(formDiff, std::map<std::string, int>(std::string cur, std::string prev));
 };
 
 template<class ManagerType>
@@ -35,9 +36,8 @@ public:
         current = " ";
     }
     void displayContentToTextbox() {
-        TextDiff diff;
-        std::map<TextDiff,int> a = {{diff,1}};
-        manager_->addDiff(diff);
+        std::map<std::string,int> a = {{" ",1}};
+        manager_->addDiff(" ");
         manager_->getString();
         manager_->getDiff();
         manager_->formDiff(current, current);
@@ -53,28 +53,28 @@ public:
         current = " ";
     }
 std::string getText() {
-    struct TextDiff diff = {0, 0, " ", " "};
-    std::map<TextDiff,int> a = {{diff,1}};
-    manager_->updateText(current,a);
+    std::map<std::string,int> a = {{" ",1}};
+    manager_->updateText(current,current);
     manager_->formDiff(current,current);
     return current;
     }
-
 };
 
 TEST(RoomText, Test1) {
     MockRoomTextManager textManager;
-    struct TextDiff diff = {0, 0, " ", " "};
-    EXPECT_CALL(textManager, addDiff(diff)).Times(AtLeast(1));
+    EXPECT_CALL(textManager, addDiff(" ")).Times(AtLeast(1));
     EXPECT_CALL(textManager, getString()).Times(AtLeast(1));
     EXPECT_CALL(textManager, formDiff(" "," ")).Times(AtLeast(1));
-    GUI<RoomTextManager> chat(&textManager);
+    GUI<RoomTextManager<std::string>> chat(&textManager);
     chat.displayContentToTextbox();
-
 }
 
 TEST(ClientText, Test1) {
-    EXPECT_TRUE(1);
+    MockClientTextManager textManager;
+    EXPECT_CALL(textManager, formDiff(" "," ")).Times(AtLeast(1));
+    EXPECT_CALL(textManager, updateText(" "," ")).Times(AtLeast(1));
+    ChatRoom<MockClientTextManager> chat(&textManager);
+    chat.getText();
 }
 
 int main(int argc, char **argv) {
