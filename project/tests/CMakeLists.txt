@@ -13,6 +13,8 @@ find_package(Threads REQUIRED)
 include_directories("${GTEST_INCLUDE_DIRS}")
 
 add_executable(Tests
+        src/main.cpp
+        src/test_interface.cpp
         ../src/ChatRoom.cpp
         ../src/RoomManager.cpp
         ../src/MongoConnector.cpp
@@ -20,7 +22,7 @@ add_executable(Tests
 
 set_target_properties(Tests PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
 
-target_link_libraries(Tests ${GTEST_BOTH_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} pc_catalog)
+target_link_libraries(Tests ${GTEST_BOTH_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
 add_test(
         NAME BaseTest
