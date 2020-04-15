@@ -4,19 +4,17 @@
 #include <iostream>
 #include "Acceptor.hpp"
 
-template<class T>
+template<class AcceptorType>
 class Server {
 public:
-    Server(T* acceptor) {
-        acceptor_ = acceptor;
-    }
+    Server(AcceptorType* acceptor) : acceptor_(acceptor) {}
     void run() {
         acceptor_->setOption(0);
         acceptor_->open();
         acceptor_->listen();
     }
 private:
-    T* acceptor_;
+    AcceptorType* acceptor_;
 };
 
 #endif  //  PROJECT_INCLUDE_SERVER_H_
