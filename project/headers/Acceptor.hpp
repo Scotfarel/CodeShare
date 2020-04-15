@@ -6,11 +6,10 @@
 class Acceptor {
 public:
     Acceptor();
-    virtual ~Acceptor() = default;
-    virtual void open();
-    virtual void close();
-    virtual void listen();
-    virtual void setOption();
+    void open();
+    void close();
+    void listen();
+    void setOption(int option);
 private:
     int state;
 };
