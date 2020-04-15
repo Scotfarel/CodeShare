@@ -14,6 +14,7 @@ set(LIB_SOURCE_FILES
     ${SOURCE_DIR}Acceptor.cpp
     ${SOURCE_DIR}Server.cpp
     ${SOURCE_DIR}Connection.cpp
+    ${SOURCE_DIR}ConnectionManager.cpp
 )
 
 add_library(project_lib STATIC ${LIB_SOURCE_FILES})
