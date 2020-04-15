@@ -1,6 +1,6 @@
 #include "Connection.hpp"
 
-Connection::Connection() = default;
+Connection::Connection(RequestHandler handler) : requestHandler(handler) {}
 
 void Connection::start() {
     std::cout << "start" << std::endl;
@@ -12,6 +12,7 @@ void Connection::stop() {
 
 void Connection::read() {
     std::cout << "read" << std::endl;
+    requestHandler.handleRequest();
 }
 
 void Connection::write() {
