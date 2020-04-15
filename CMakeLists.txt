@@ -8,15 +8,18 @@ set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -std=c++0x -Wall -ggdb3")
 
 include_directories(project/headers)
 
+set(SOURCE_DIR project/src/)
+
 set(LIB_SOURCE_FILES
-    project/src/Acceptor.cpp
+    ${SOURCE_DIR}Acceptor.cpp
+    ${SOURCE_DIR}Server.cpp
 )
 
 add_library(project_lib STATIC ${LIB_SOURCE_FILES})
 
 enable_testing()
 
-add_executable(CodeShare project/src/main.cpp)
+add_executable(CodeShare ${SOURCE_DIR}main.cpp)
 
 target_link_libraries(CodeShare project_lib)
 
