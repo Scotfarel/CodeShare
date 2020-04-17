@@ -7,7 +7,7 @@
 class RequestHandler {
 public:
     RequestHandler();
-    void handleRequest();
+    void handleRequest(int request);
 };
 
 #endif  //  PROJECT_INCLUDE_REQUEST_HANDLER_H_

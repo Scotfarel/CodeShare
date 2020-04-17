@@ -21,7 +21,7 @@ private:
     HandlerType* requestHandler;
 
     void read() {
-        requestHandler->handleRequest();
+        requestHandler->handleRequest(0);
     }
 
     void write() {

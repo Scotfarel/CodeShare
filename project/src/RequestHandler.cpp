@@ -2,6 +2,6 @@
 
 RequestHandler::RequestHandler() = default;
 
-void RequestHandler::handleRequest() {
+void RequestHandler::handleRequest(int request) {
     std::cout << "handleRequest" << std::endl;
 }

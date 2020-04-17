@@ -58,12 +58,13 @@ TEST(ConnectionManagerTest, stopCallConnectionStop) {
 
 class MockRequestHandler : public RequestHandler {
 public:
-	MOCK_METHOD0(handleRequest, void());
+	MOCK_METHOD1(handleRequest, void(int request));
 };
 
 TEST(ConnectionTest, startCallHandleRequest) {
 	MockRequestHandler handler;
-	EXPECT_CALL(handler, handleRequest()).Times(AtLeast(1));
+	int request = 0;
+	EXPECT_CALL(handler, handleRequest(request)).Times(AtLeast(1));
 
 	Connection<MockRequestHandler> connection(&handler);
 	connection.start();
