@@ -17,9 +17,6 @@ set(SOURCE_DIR project/src/)
 
 set(LIB_SOURCE_FILES
     ${SOURCE_DIR}Acceptor.cpp
-    ${SOURCE_DIR}Server.cpp
-    ${SOURCE_DIR}Connection.cpp
-    ${SOURCE_DIR}ConnectionManager.cpp
     ${SOURCE_DIR}RequestHandler.cpp
 )
 
