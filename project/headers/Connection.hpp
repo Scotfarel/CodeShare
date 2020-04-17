@@ -1,20 +1,32 @@
 #ifndef PROJECT_INCLUDE_CONNECTION_H_
 #define PROJECT_INCLUDE_CONNECTION_H_
 
-#include "RequestHandler.hpp"
 #include <iostream>
 #include <vector>
 
+template<class HandlerType>
 class Connection {
 public:
-    Connection(RequestHandler handler = RequestHandler());
-    void start();
-    void stop();
+    Connection(HandlerType* handler) : requestHandler(handler) {}
+
+    void start() {
+        read();
+    }
+
+    void stop() {
+        std::cout << "stop" << std::endl;
+    }
 private:
     std::vector<char> buffer;
-    RequestHandler requestHandler;
-    void read();
-    void write();
+    HandlerType* requestHandler;
+
+    void read() {
+        requestHandler->handleRequest();
+    }
+
+    void write() {
+        std::cout << "write" << std::endl;
+    }
 };
 
 #endif  //  PROJECT_INCLUDE_CONNECTION_H_

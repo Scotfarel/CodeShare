@@ -1,11 +1,11 @@
 #include "Server.hpp"
 
-// template<class T>
-// Server<T>::Server(T* acceptor) {
+// template<class AcceptorType>
+// Server<AcceptorType>::Server(AcceptorType* acceptor) {
 //     acceptor_ = acceptor;
 // }
 
-// template<class T>
-// void Server<T>::run() {
+// template<class AcceptorType>
+// void Server<AcceptorType>::run() {
 //     acceptor_->open();
 // }

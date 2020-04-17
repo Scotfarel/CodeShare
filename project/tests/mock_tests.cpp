@@ -31,14 +31,16 @@ TEST(ServerTest, runCallOpen) {
 	server.run();
 }
 
-class MockConnection : public Connection {
+class MockConnection : public Connection<RequestHandler> {
 public:
+	MockConnection(RequestHandler* handler): Connection<RequestHandler>(handler) {}
 	MOCK_METHOD0(start, void());
 	MOCK_METHOD0(stop, void());
 };
 
 TEST(ConnectionManagerTest, startCallConnectionStart) {
-	MockConnection connection;
+	RequestHandler handler;
+	MockConnection connection(&handler);
 	EXPECT_CALL(connection, start()).Times(AtLeast(1));
 
 	ConnectionManager<MockConnection> manager;
@@ -46,11 +48,25 @@ TEST(ConnectionManagerTest, startCallConnectionStart) {
 }
 
 TEST(ConnectionManagerTest, stopCallConnectionStop) {
-	MockConnection connection;
+	RequestHandler handler;
+	MockConnection connection(&handler);
 	EXPECT_CALL(connection, stop()).Times(AtLeast(1));
 
 	ConnectionManager<MockConnection> manager;
 	manager.stop(&connection);
+}
+
+class MockRequestHandler : public RequestHandler {
+public:
+	MOCK_METHOD0(handleRequest, void());
+};
+
+TEST(ConnectionTest, startCallHandleRequest) {
+	MockRequestHandler handler;
+	EXPECT_CALL(handler, handleRequest()).Times(AtLeast(1));
+
+	Connection<MockRequestHandler> connection(&handler);
+	connection.start();
 }
 
 int main(int argc, char** argv) {
