@@ -18,6 +18,7 @@ set(SOURCE_DIR project/src/)
 set(LIB_SOURCE_FILES
     ${SOURCE_DIR}Acceptor.cpp
     ${SOURCE_DIR}RequestHandler.cpp
+    ${SOURCE_DIR}RoomScheduler.cpp
 )
 
 add_library(project_lib STATIC ${LIB_SOURCE_FILES})
