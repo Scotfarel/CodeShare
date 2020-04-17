@@ -7,11 +7,9 @@
 #include "Connection.hpp"
 #include "ConnectionManager.hpp"
 #include "RequestHandler.hpp"
+#include "RoomScheduler.hpp"
 
 using ::testing::AtLeast;
-using ::testing::DoAll;
-using ::testing::Return;
-using ::testing::SetArgReferee;
 
 class MockAcceptor : public Acceptor {
 public:
@@ -31,15 +29,16 @@ TEST(ServerTest, runCallOpen) {
 	server.run();
 }
 
-class MockConnection : public Connection<RequestHandler> {
+class MockConnection : public Connection<RequestHandler<RoomScheduler> > {
 public:
-	MockConnection(RequestHandler* handler): Connection<RequestHandler>(handler) {}
+	MockConnection(RequestHandler<RoomScheduler>* handler): Connection<RequestHandler<RoomScheduler> >(handler) {}
 	MOCK_METHOD0(start, void());
 	MOCK_METHOD0(stop, void());
 };
 
 TEST(ConnectionManagerTest, startCallConnectionStart) {
-	RequestHandler handler;
+	RoomScheduler scheduler;
+	RequestHandler<RoomScheduler> handler(&scheduler);
 	MockConnection connection(&handler);
 	EXPECT_CALL(connection, start()).Times(AtLeast(1));
 
@@ -48,7 +47,8 @@ TEST(ConnectionManagerTest, startCallConnectionStart) {
 }
 
 TEST(ConnectionManagerTest, stopCallConnectionStop) {
-	RequestHandler handler;
+	RoomScheduler scheduler;
+	RequestHandler<RoomScheduler> handler(&scheduler);
 	MockConnection connection(&handler);
 	EXPECT_CALL(connection, stop()).Times(AtLeast(1));
 
@@ -56,18 +56,41 @@ TEST(ConnectionManagerTest, stopCallConnectionStop) {
 	manager.stop(&connection);
 }
 
-class MockRequestHandler : public RequestHandler {
+class MockRequestHandler : public RequestHandler<RoomScheduler> {
 public:
+	MockRequestHandler(RoomScheduler* scheduler) : RequestHandler<RoomScheduler>(scheduler) {}
 	MOCK_METHOD1(handleRequest, void(int request));
 };
 
 TEST(ConnectionTest, startCallHandleRequest) {
-	MockRequestHandler handler;
+	RoomScheduler scheduler;
+	MockRequestHandler handler(&scheduler);
 	int request = 0;
 	EXPECT_CALL(handler, handleRequest(request)).Times(AtLeast(1));
 
 	Connection<MockRequestHandler> connection(&handler);
 	connection.start();
+}
+
+class MockRoomScheduler : public RoomScheduler {
+public:
+	MOCK_METHOD0(createRoom, void());
+	MOCK_METHOD0(getRoom, void());
+	MOCK_METHOD0(connectToRoom, void());
+	MOCK_METHOD0(deleteRoom, void());
+};
+
+TEST(RequestHandlerTest, handlerRequestCallRoomSchedulersMethods) {
+	MockRoomScheduler scheduler;
+	EXPECT_CALL(scheduler, createRoom()).Times(AtLeast(1));
+	EXPECT_CALL(scheduler, getRoom()).Times(AtLeast(1));
+	EXPECT_CALL(scheduler, connectToRoom()).Times(AtLeast(1));
+	EXPECT_CALL(scheduler, deleteRoom()).Times(AtLeast(1));
+
+	RequestHandler<MockRoomScheduler> handler(&scheduler);
+	for (int request = 0; request <= 3; request++) {
+		handler.handleRequest(request);
+	}
 }
 
 int main(int argc, char** argv) {
