@@ -2,17 +2,17 @@
 // Created by ivan on 4/15/20.
 //
 
-#ifndef CODESHARE_ROOMTEXTMANAGER_H
-#define CODESHARE_ROOMTEXTMANAGER_H
+#ifndef CODESHARE_ROOMTEXTBUILDER_H
+#define CODESHARE_ROOMTEXTBUILDER_H
 
 #include <string>
 #include <vector>
 #include <map>
 
-class RoomTextManager {
+class RoomTextBuilder {
 public:
-    RoomTextManager() = default;
-    ~RoomTextManager() = default;
+    RoomTextBuilder() = default;
+    ~RoomTextBuilder() = default;
 
     std::string getString() { return currentText; };
     std::string getDiff();
@@ -21,4 +21,4 @@ private:
     std::string currentText;
 };
 
-#endif //CODESHARE_ROOMTEXTMANAGER_H
+#endif //CODESHARE_ROOMTEXTBUILDER_H

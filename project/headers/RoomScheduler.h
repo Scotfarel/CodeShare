@@ -2,8 +2,8 @@
 // Created by ivan on 4/15/20.
 //
 
-#ifndef CODESHARE_ROOMMANAGER_H
-#define CODESHARE_ROOMMANAGER_H
+#ifndef CODESHARE_ROOMSCHEDULER_H
+#define CODESHARE_ROOMSCHEDULER_H
 
 #include <string>
 #include <vector>
@@ -11,10 +11,10 @@
 #include <ChatRoom.h>
 
 template <class ChatRoomInterface>
-class RoomManager {
+class RoomScheduler {
 public:
-    RoomManager() = default;
-    ~RoomManager() = default;
+    RoomScheduler() = default;
+    ~RoomScheduler() = default;
     ChatRoomInterface* createRoom(int id) { return nullptr; };
     ChatRoomInterface* getRoom(int id);
     bool connectToRoom(ChatRoomInterface* room);
@@ -25,16 +25,16 @@ private:
 };
 
 template<class ChatRoomInterface>
-bool RoomManager<ChatRoomInterface>::connectToRoom(ChatRoomInterface *room) {
+bool RoomScheduler<ChatRoomInterface>::connectToRoom(ChatRoomInterface *room) {
     room->addUser();
     roomsContainer.push_back(room);
     return true;
 }
 
 template<class ChatRoomInterface>
-ChatRoomInterface* RoomManager<ChatRoomInterface>::getRoom(int id) {
+ChatRoomInterface* RoomScheduler<ChatRoomInterface>::getRoom(int id) {
     return roomsContainer[id];
 }
 
 
-#endif //CODESHARE_ROOMMANAGER_H
+#endif //CODESHARE_ROOMSCHEDULER_H

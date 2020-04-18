@@ -16,10 +16,12 @@
 
 class MongoConnector {
 public:
+    MongoConnector() = default;
     MongoConnector(std::string db, std::string coll) : dbName(std::move(db)), collName(std::move(coll)) {};
-    std::string getCurrText();
-    std::string getChunk();
-    bool saveDiff();
+    std::string getCurrText() { return " ";};
+    std::string getChunk() { return " ";};
+    bool saveDiff() { return true; };
+    bool createRoomTable(std::string tableName) { return true; };
 
 private:
     std::string dbName;
@@ -29,8 +31,6 @@ private:
 //    mongocxx::client client;
 //    mongocxx::database database;
 //    mongocxx::collection collection;
-
-    bool createTextTable(std::string tableName);
 };
 
 #endif //CODESHARE_MONGOCONNECTOR_H

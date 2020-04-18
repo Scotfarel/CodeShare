@@ -8,31 +8,42 @@
 #include <string>
 
 #include <MongoConnector.h>
-#include <RoomTextManager.h>
+#include <RoomTextBuilder.h>
 
 
-template <class MockTextManager>
+template <class MockTextBuilder, class MockMongoConnector>
 class ChatRoom {
 public:
     ChatRoom()= default;
-    std::string getText(MockTextManager* manager);
+    ChatRoom(MockMongoConnector* dbConnector) : conn(dbConnector) {};
+    std::string getText(MockTextBuilder* manager);
+
+    // There will be more methods for using a DB.
+    // Now we don't have enough representations.
     std::string addUser();
 
     int id = 0;
 private:
     std::string sharedText;
-    bool createDbTask() { return true; };
+    MockMongoConnector* conn;
 
+    bool createDbTask() { return true; };
 };
 
-template<class MockTextManager>
-std::string ChatRoom<MockTextManager>::addUser() {
+template<class MockTextBuilder, class MockMongoConnector>
+std::string ChatRoom<MockTextBuilder, MockMongoConnector>::addUser() {
+    conn->getCurrText();
+    conn->getChunk();
+    conn->saveDiff();
+    conn->createRoomTable("testTableName");
     return std::string();
 }
 
-template<class MockTextManager>
-std::string ChatRoom<MockTextManager>::getText(MockTextManager* manager) {
-    return manager->getString();
+template<class MockTextBuilder, class MockMongoConnector>
+std::string ChatRoom<MockTextBuilder, MockMongoConnector>::getText(MockTextBuilder* builder) {
+    builder->getString();
+    return "";
 }
+
 
 #endif //CODESHARE_CHATROOM_H

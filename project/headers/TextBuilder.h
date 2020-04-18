@@ -2,19 +2,19 @@
 // Created by ivan on 4/15/20.
 //
 
-#ifndef CODESHARE_TEXTMANGER_H
-#define CODESHARE_TEXTMANGER_H
+#ifndef CODESHARE_TEXTBUILDER_H
+#define CODESHARE_TEXTBUILDER_H
 
 #include <string>
 
-class TextManager {
+class TextBuilder {
 public:
-    TextManager() = default;
-    ~TextManager() = default;
+    TextBuilder() = default;
+    ~TextBuilder() = default;
 
     std::string getString() { return currentText; };
 private:
     std::string currentText;
 };
 
-#endif //CODESHARE_TEXTMANGER_H
+#endif //CODESHARE_TEXTBUILDER_H
