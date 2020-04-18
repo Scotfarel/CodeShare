@@ -4,10 +4,6 @@
 #include "headers/TextDiff.h"
 
 using ::testing::AtLeast;
-using ::testing::DoAll;
-using ::testing::Return;
-using ::testing::SetArgReferee;
-
 
 class MockClientTextManager : public ClientTextManager {
 public:
