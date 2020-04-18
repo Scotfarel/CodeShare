@@ -2,15 +2,15 @@
 #include "TextManager.h"
 #include <map>
 #include <queue>
+
 class RoomTextManager: public TextManager {
 private:
     std::string prevText;
-    std::map<TextDiff,int> diffToHandle;
-    std::map<TextDiff, int> diffToSend;
+    std::map<std::string,int> diffToHandle;
+    std::map<std::string, int> diffToSend;
 public:
-    RoomTextManager();
-    bool addDiff(TextDiff);
-    TextDiff getDiff();
-    std::map<TextDiff, int> formDiff(std::string cur, std::string prev);
+    bool addDiff(std::string);
+    std::string getDiff();
+    std::map<std::string, int> formDiff(std::string cur, std::string prev);
 
 };

@@ -15,8 +15,7 @@ protected:
     std::string currentText;
 
 public:
-    std::map<TextDiff,int> formDiff(std::string cur, std::string prev);
-    TextManager();
+    std::map<std::string,int> formDiff(std::string cur, std::string prev);
     std::string getString();
 };
 

@@ -6,6 +6,12 @@ find_package(Threads REQUIRED)
 include_directories(project/headers)
 include_directories("${GTEST_INCLUDE_DIRS}")
 
+add_executable(tests tests.cpp
+        headers/RoomTextManager.h
+        headers/ClientTextManager.h
+        headers/TextDiff.h
+        headers/TextManager.h)
+
 function(_gmock_append_debugs _endvar _library)
     if(${_library} AND ${_library}_DEBUG)
         set(_output optimized ${${_library}} debug ${${_library}_DEBUG})
@@ -75,12 +81,6 @@ if(GMOCK_FOUND)
 endif()
 
 # end of search code
-
-add_executable(tests tests.cpp
-        headers/RoomTextManager.h
-        headers/ClientTextManager.h
-        headers/TextDiff.h
-        headers/TextManager.h)
 
 set_target_properties(tests PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
 
