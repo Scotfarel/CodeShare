@@ -28,4 +28,14 @@ add_executable(CodeShare ${SOURCE_DIR}main.cpp)
 
 target_link_libraries(CodeShare project_lib)
 
+set(Boost_USE_STATIC_LIBS OFF) 
+set(Boost_USE_MULTITHREADED ON)  
+set(Boost_USE_STATIC_RUNTIME OFF) 
+find_package(Boost 1.63.0 COMPONENTS system) 
+
+if(Boost_FOUND)
+    include_directories(${Boost_INCLUDE_DIRS}) 
+    target_link_libraries(CodeShare ${Boost_LIBRARIES})
+endif()
+
 add_subdirectory(project/tests)
