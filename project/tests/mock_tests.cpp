@@ -1,6 +1,7 @@
 #include <iostream>
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
+#include "boost/asio.hpp"
 
 #include "Acceptor.hpp"
 #include "Server.hpp"
@@ -13,17 +14,35 @@ using ::testing::AtLeast;
 
 class MockAcceptor : public Acceptor {
 public:
+	using Acceptor::Acceptor;
 	MOCK_METHOD1(setOption, void(int option));
 	MOCK_METHOD0(open, void());
 	MOCK_METHOD0(listen, void());
 };
 
 TEST(ServerTest, runCallOpen) {
-	MockAcceptor acceptor;
+	boost::asio::io_service service;
+	MockAcceptor acceptor(service);
+	EXPECT_CALL(acceptor, open()).Times(AtLeast(1));
+
+	Server<MockAcceptor> server(&acceptor);
+	server.run();
+}
+
+TEST(ServerTest, runCallListen) {
+	boost::asio::io_service service;
+	MockAcceptor acceptor(service);
+	EXPECT_CALL(acceptor, listen()).Times(AtLeast(1));
+
+	Server<MockAcceptor> server(&acceptor);
+	server.run();
+}
+
+TEST(ServerTest, runCallSetOption) {
+	boost::asio::io_service service;
+	MockAcceptor acceptor(service);
 	int option = 0;
 	EXPECT_CALL(acceptor, setOption(option)).Times(AtLeast(1));
-	EXPECT_CALL(acceptor, open()).Times(AtLeast(1));
-	EXPECT_CALL(acceptor, listen()).Times(AtLeast(1));
 
 	Server<MockAcceptor> server(&acceptor);
 	server.run();

@@ -1,8 +1,6 @@
 #include "Acceptor.hpp"
 
-Acceptor::Acceptor() {
-    state = 0;
-}
+Acceptor::Acceptor(boost::asio::io_service& io_service): acceptor_(io_service), state(0) {}
 
 void Acceptor::open() {
     std::cout << "open" << std::endl;
