@@ -7,13 +7,17 @@
 template<class AcceptorType>
 class Server {
 public:
-    Server(AcceptorType* acceptor) : acceptor_(acceptor) {}
+    Server(boost::asio::io_service* ioService, AcceptorType* acceptor) : ioService(ioService), acceptor_(acceptor) {}
+
     void run() {
         acceptor_->setOption(true);
         acceptor_->open();
         acceptor_->listen();
+
+        ioService->run();
     }
 private:
+    boost::asio::io_service* ioService;
     AcceptorType* acceptor_;
 };
 

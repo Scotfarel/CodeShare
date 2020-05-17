@@ -26,7 +26,7 @@ TEST(ServerTest, runCallOpen) {
 	MockAcceptor acceptor(service, endpoint);
 	EXPECT_CALL(acceptor, open()).Times(AtLeast(1));
 
-	Server<MockAcceptor> server(&acceptor);
+	Server<MockAcceptor> server(&service, &acceptor);
 	server.run();
 }
 
@@ -36,7 +36,7 @@ TEST(ServerTest, runCallListen) {
 	MockAcceptor acceptor(service, endpoint);
 	EXPECT_CALL(acceptor, listen()).Times(AtLeast(1));
 
-	Server<MockAcceptor> server(&acceptor);
+	Server<MockAcceptor> server(&service, &acceptor);
 	server.run();
 }
 
@@ -47,7 +47,7 @@ TEST(ServerTest, runCallSetOption) {
 	bool option = true;
 	EXPECT_CALL(acceptor, setOption(option)).Times(AtLeast(1));
 
-	Server<MockAcceptor> server(&acceptor);
+	Server<MockAcceptor> server(&service, &acceptor);
 	server.run();
 }
 
