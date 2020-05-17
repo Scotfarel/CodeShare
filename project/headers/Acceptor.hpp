@@ -6,14 +6,14 @@
 
 class Acceptor {
 public:
-    Acceptor(boost::asio::io_service& io_service);
+    Acceptor(boost::asio::io_service& io_service, boost::asio::ip::tcp::endpoint& endpoint);
     void open();
     void close();
     void listen();
     void setOption(int option);
 private:
-    int state;
-    boost::asio::ip::tcp::acceptor acceptor_; 
+    boost::asio::ip::tcp::endpoint endpoint;
+    boost::asio::ip::tcp::acceptor acceptor_;
 };
 
 #endif  //  PROJECT_INCLUDE_ACCEPTOR_H_

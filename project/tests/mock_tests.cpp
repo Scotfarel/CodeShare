@@ -22,7 +22,8 @@ public:
 
 TEST(ServerTest, runCallOpen) {
 	boost::asio::io_service service;
-	MockAcceptor acceptor(service);
+	boost::asio::ip::tcp::endpoint endpoint;
+	MockAcceptor acceptor(service, endpoint);
 	EXPECT_CALL(acceptor, open()).Times(AtLeast(1));
 
 	Server<MockAcceptor> server(&acceptor);
@@ -31,7 +32,8 @@ TEST(ServerTest, runCallOpen) {
 
 TEST(ServerTest, runCallListen) {
 	boost::asio::io_service service;
-	MockAcceptor acceptor(service);
+	boost::asio::ip::tcp::endpoint endpoint;
+	MockAcceptor acceptor(service, endpoint);
 	EXPECT_CALL(acceptor, listen()).Times(AtLeast(1));
 
 	Server<MockAcceptor> server(&acceptor);
@@ -40,8 +42,9 @@ TEST(ServerTest, runCallListen) {
 
 TEST(ServerTest, runCallSetOption) {
 	boost::asio::io_service service;
-	MockAcceptor acceptor(service);
-	int option = 0;
+	boost::asio::ip::tcp::endpoint endpoint;
+	MockAcceptor acceptor(service, endpoint);
+	bool option = true;
 	EXPECT_CALL(acceptor, setOption(option)).Times(AtLeast(1));
 
 	Server<MockAcceptor> server(&acceptor);

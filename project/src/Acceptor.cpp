@@ -1,16 +1,17 @@
 #include "Acceptor.hpp"
 
-Acceptor::Acceptor(boost::asio::io_service& io_service): acceptor_(io_service), state(0) {}
+Acceptor::Acceptor(boost::asio::io_service& io_service, boost::asio::ip::tcp::endpoint& endpoint): endpoint(endpoint), acceptor_(io_service) {}
 
 void Acceptor::open() {
-    std::cout << "open" << std::endl;
+    acceptor_.open(endpoint.protocol());
 }
 
 void Acceptor::close() {
-    std::cout << "close" << std::endl;
+    acceptor_.close();
 }
+
 void Acceptor::listen() {
-    std::cout << "listen" << std::endl;
+    acceptor_.listen();
 }
 void Acceptor::setOption(int option) {
     std::cout << "option is " << option << std::endl;
