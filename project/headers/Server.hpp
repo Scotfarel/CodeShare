@@ -20,6 +20,7 @@ public:
     void run() {
         acceptor_->open();
         acceptor_->setOption(true);
+        acceptor_->bind();
         acceptor_->listen();
 
         ioService->run();

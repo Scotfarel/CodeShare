@@ -10,6 +10,10 @@ void Acceptor::close() {
     acceptor_.close();
 }
 
+void Acceptor::bind() {
+    acceptor_.bind(endpoint);
+}
+
 void Acceptor::listen() {
     acceptor_.listen();
 }

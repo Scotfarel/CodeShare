@@ -17,6 +17,7 @@ public:
 	using Acceptor::Acceptor;
 	MOCK_METHOD1(setOption, void(bool option));
 	MOCK_METHOD0(open, void());
+	MOCK_METHOD0(bind, void());
 	MOCK_METHOD0(listen, void());
 };
 
@@ -25,6 +26,16 @@ TEST(ServerTest, runCallOpen) {
 	boost::asio::ip::tcp::endpoint endpoint;
 	MockAcceptor acceptor(service, endpoint);
 	EXPECT_CALL(acceptor, open()).Times(AtLeast(1));
+
+	Server<MockAcceptor> server(&service, &acceptor);
+	server.run();
+}
+
+TEST(ServerTest, runCallBind) {
+	boost::asio::io_service service;
+	boost::asio::ip::tcp::endpoint endpoint;
+	MockAcceptor acceptor(service, endpoint);
+	EXPECT_CALL(acceptor, bind()).Times(AtLeast(1));
 
 	Server<MockAcceptor> server(&service, &acceptor);
 	server.run();

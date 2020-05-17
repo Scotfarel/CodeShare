@@ -9,6 +9,7 @@ public:
     Acceptor(boost::asio::io_service& io_service, boost::asio::ip::tcp::endpoint& endpoint);
     void open();
     void close();
+    void bind();
     void listen();
     void setOption(bool reuseAddress);
 private:
