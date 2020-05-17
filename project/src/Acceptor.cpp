@@ -13,6 +13,7 @@ void Acceptor::close() {
 void Acceptor::listen() {
     acceptor_.listen();
 }
-void Acceptor::setOption(int option) {
-    std::cout << "option is " << option << std::endl;
+
+void Acceptor::setOption(bool reuseAddress) {
+    acceptor_.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
 }

@@ -9,7 +9,7 @@ class Server {
 public:
     Server(AcceptorType* acceptor) : acceptor_(acceptor) {}
     void run() {
-        acceptor_->setOption(0);
+        acceptor_->setOption(true);
         acceptor_->open();
         acceptor_->listen();
     }

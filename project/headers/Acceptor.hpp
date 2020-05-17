@@ -10,7 +10,7 @@ public:
     void open();
     void close();
     void listen();
-    void setOption(int option);
+    void setOption(bool reuseAddress);
 private:
     boost::asio::ip::tcp::endpoint endpoint;
     boost::asio::ip::tcp::acceptor acceptor_;

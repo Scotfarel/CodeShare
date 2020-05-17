@@ -15,7 +15,7 @@ using ::testing::AtLeast;
 class MockAcceptor : public Acceptor {
 public:
 	using Acceptor::Acceptor;
-	MOCK_METHOD1(setOption, void(int option));
+	MOCK_METHOD1(setOption, void(bool option));
 	MOCK_METHOD0(open, void());
 	MOCK_METHOD0(listen, void());
 };
