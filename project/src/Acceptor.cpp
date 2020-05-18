@@ -22,3 +22,7 @@ void Acceptor::setOption(bool reuseAddress) {
     boost::asio::ip::tcp::acceptor::reuse_address option(reuseAddress);
     acceptor_.set_option(option);
 }
+
+boost::asio::ip::tcp::acceptor&Acceptor::origin() {
+    return acceptor_;
+}
