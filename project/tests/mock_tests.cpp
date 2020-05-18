@@ -27,8 +27,8 @@ TEST(ServerTest, runCallOpen) {
 	MockAcceptor acceptor(service, endpoint);
 	EXPECT_CALL(acceptor, open()).Times(AtLeast(1));
 
-	Server<MockAcceptor> server(&service, &acceptor);
-	server.run();
+	Server<MockAcceptor> server(service, &acceptor);
+	server.run(5000);
 }
 
 TEST(ServerTest, runCallBind) {
@@ -37,8 +37,8 @@ TEST(ServerTest, runCallBind) {
 	MockAcceptor acceptor(service, endpoint);
 	EXPECT_CALL(acceptor, bind()).Times(AtLeast(1));
 
-	Server<MockAcceptor> server(&service, &acceptor);
-	server.run();
+	Server<MockAcceptor> server(service, &acceptor);
+	server.run(5000);
 }
 
 TEST(ServerTest, runCallListen) {
@@ -47,8 +47,8 @@ TEST(ServerTest, runCallListen) {
 	MockAcceptor acceptor(service, endpoint);
 	EXPECT_CALL(acceptor, listen()).Times(AtLeast(1));
 
-	Server<MockAcceptor> server(&service, &acceptor);
-	server.run();
+	Server<MockAcceptor> server(service, &acceptor);
+	server.run(5000);
 }
 
 TEST(ServerTest, runCallSetOption) {
@@ -58,13 +58,13 @@ TEST(ServerTest, runCallSetOption) {
 	bool option = true;
 	EXPECT_CALL(acceptor, setOption(option)).Times(AtLeast(1));
 
-	Server<MockAcceptor> server(&service, &acceptor);
-	server.run();
+	Server<MockAcceptor> server(service, &acceptor);
+	server.run(5000);
 }
 
 class MockConnection : public Connection<RequestHandler<RoomScheduler> > {
 public:
-	MockConnection(RequestHandler<RoomScheduler>* handler): Connection<RequestHandler<RoomScheduler> >(handler) {}
+	using Connection::Connection;
 	MOCK_METHOD0(start, void());
 	MOCK_METHOD0(stop, void());
 };
@@ -72,7 +72,8 @@ public:
 TEST(ConnectionManagerTest, startCallConnectionStart) {
 	RoomScheduler scheduler;
 	RequestHandler<RoomScheduler> handler(&scheduler);
-	MockConnection connection(&handler);
+	boost::asio::io_service service;
+	MockConnection connection(&handler, service);
 	EXPECT_CALL(connection, start()).Times(AtLeast(1));
 
 	ConnectionManager<MockConnection> manager;
@@ -82,7 +83,8 @@ TEST(ConnectionManagerTest, startCallConnectionStart) {
 TEST(ConnectionManagerTest, stopCallConnectionStop) {
 	RoomScheduler scheduler;
 	RequestHandler<RoomScheduler> handler(&scheduler);
-	MockConnection connection(&handler);
+	boost::asio::io_service service;
+	MockConnection connection(&handler, service);
 	EXPECT_CALL(connection, stop()).Times(AtLeast(1));
 
 	ConnectionManager<MockConnection> manager;
@@ -101,7 +103,8 @@ TEST(ConnectionTest, startCallHandleRequest) {
 	int request = 0;
 	EXPECT_CALL(handler, handleRequest(request)).Times(AtLeast(1));
 
-	Connection<MockRequestHandler> connection(&handler);
+	boost::asio::io_service service;
+	Connection<MockRequestHandler> connection(&handler, service);
 	connection.start();
 }
 

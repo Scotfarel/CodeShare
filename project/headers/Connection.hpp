@@ -7,7 +7,7 @@
 template<class HandlerType>
 class Connection {
 public:
-    Connection(HandlerType* handler) : requestHandler(handler) {}
+    Connection(HandlerType* handler, boost::asio::io_service& ioService) : requestHandler(handler), socket_(ioService) {}
 
     void start() {
         read();
@@ -16,9 +16,14 @@ public:
     void stop() {
         std::cout << "stop" << std::endl;
     }
+
+    boost::asio::ip::tcp::socket& getSocket() {
+        return socket_;
+    }
 private:
     std::vector<char> buffer;
     HandlerType* requestHandler;
+    boost::asio::ip::tcp::socket socket_;
 
     void read() {
         requestHandler->handleRequest(0);
