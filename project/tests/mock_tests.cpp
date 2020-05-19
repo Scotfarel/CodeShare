@@ -73,22 +73,26 @@ TEST(ConnectionManagerTest, startCallConnectionStart) {
 	RoomScheduler scheduler;
 	RequestHandler<RoomScheduler> handler(&scheduler);
 	boost::asio::io_service service;
-	MockConnection connection(&handler, service);
-	EXPECT_CALL(connection, start()).Times(AtLeast(1));
+
+	MockConnection* connection = new MockConnection(&handler, service);
+	std::shared_ptr<MockConnection> sharedConnection(connection);
+	EXPECT_CALL(*sharedConnection, start()).Times(AtLeast(1));
 
 	ConnectionManager<MockConnection> manager;
-	manager.start(&connection);
+	manager.start(sharedConnection);
 }
 
 TEST(ConnectionManagerTest, stopCallConnectionStop) {
 	RoomScheduler scheduler;
 	RequestHandler<RoomScheduler> handler(&scheduler);
 	boost::asio::io_service service;
-	MockConnection connection(&handler, service);
-	EXPECT_CALL(connection, stop()).Times(AtLeast(1));
+
+	MockConnection* connection = new MockConnection(&handler, service);
+	std::shared_ptr<MockConnection> sharedConnection(connection);
+	EXPECT_CALL(*sharedConnection, stop()).Times(AtLeast(1));
 
 	ConnectionManager<MockConnection> manager;
-	manager.stop(&connection);
+	manager.stop(sharedConnection);
 }
 
 class MockRequestHandler : public RequestHandler<RoomScheduler> {

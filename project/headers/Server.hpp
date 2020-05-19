@@ -8,6 +8,7 @@
 #include "Connection.hpp"
 #include "RequestHandler.hpp"
 #include "RoomScheduler.hpp"
+#include "ConnectionManager.hpp"
 
 template<class AcceptorType>
 class Server {
@@ -17,7 +18,8 @@ public:
         acceptor_(acceptor),
         roomScheduler(),
         newConnection(),
-        requestHandler(&roomScheduler) {}
+        requestHandler(&roomScheduler),
+        connectionManager() {}
 
     void run(int port) {
         acceptor_->open();
@@ -39,12 +41,11 @@ private:
     RoomScheduler roomScheduler;
     std::shared_ptr<Connection<RequestHandler<RoomScheduler> > > newConnection;
     RequestHandler<RoomScheduler> requestHandler;
+    ConnectionManager<Connection<RequestHandler<RoomScheduler> > > connectionManager;
 
     void handleAccept(const boost::system::error_code& error) {
-        // дописать
         if (!error) {
-            // вызывается метод connection manager
-            std::cout << "connectionManager method" << std::endl;
+            connectionManager.start(newConnection);
         }
         startAccept();
     }

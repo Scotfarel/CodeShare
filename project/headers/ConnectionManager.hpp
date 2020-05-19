@@ -2,25 +2,33 @@
 #define PROJECT_INCLUDE_CONNECTION_MANAGER_H_
 
 #include <iostream>
-#include <vector>
+#include <set>
 
 template<class ConnectionType>
 class ConnectionManager {
 public:
     ConnectionManager() {}
-    void start(ConnectionType* connection) {
+
+    void start(std::shared_ptr<ConnectionType> connection) {
+        std::cout << "start in ConManager" << std::endl;
+        connections.insert(connection);
         connection->start();
     }
-    void stop(ConnectionType* connection) {
+
+    void stop(std::shared_ptr<ConnectionType> connection) {
+        connections.erase(connection);
         connection->stop();
     }
+
     void stopAll() {
         for (size_t i = 0; i < connections.size(); i++) {
             connections[i].stop();
         }
+        connections.clear();
     }
+
 private:
-    std::vector<ConnectionType> connections;
+    std::set<std::shared_ptr<ConnectionType> > connections;
 };
 
 #endif  //  PROJECT_INCLUDE_CONNECTION_MANAGER_H_
