@@ -1,7 +1,7 @@
 #include "gmock/gmock.h"
-#include "headers/RoomTextManager.h"
-#include "headers/ClientTextManager.h"
-#include "headers/TextDiff.h"
+#include "../headers/RoomTextManager.h"
+#include "../headers/ClientTextManager.h"
+#include "../headers/TextDiff.h"
 
 using ::testing::AtLeast;
 
