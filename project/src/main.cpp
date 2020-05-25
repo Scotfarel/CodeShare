@@ -3,7 +3,9 @@
 //
 
 #include <iostream>
+#include <ChatRoom.h>
 
 int main() {
+    ChatRoom<class Mock, class Mock> room;
     std::cout << "Welcome to CodeShare project!" << std::endl;
 }

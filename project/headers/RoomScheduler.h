@@ -7,6 +7,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
 #include <ChatRoom.h>
 
@@ -18,6 +19,7 @@ public:
     ChatRoomInterface* createRoom(int id) { return nullptr; };
     ChatRoomInterface* getRoom(int id);
     bool connectToRoom(ChatRoomInterface* room);
+    bool leave();
     void deleteRoom(int id) {};
 
 private:
@@ -34,6 +36,11 @@ bool RoomScheduler<ChatRoomInterface>::connectToRoom(ChatRoomInterface *room) {
 template<class ChatRoomInterface>
 ChatRoomInterface* RoomScheduler<ChatRoomInterface>::getRoom(int id) {
     return roomsContainer[id];
+}
+
+template<class ChatRoomInterface>
+bool RoomScheduler<ChatRoomInterface>::leave() {
+    return false;
 }
 
 

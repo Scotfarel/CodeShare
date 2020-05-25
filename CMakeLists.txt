@@ -16,7 +16,12 @@ enable_testing()
 add_executable(CodeShare project/src/main.cpp
         project/src/ChatRoom.cpp project/headers/ChatRoom.h
         project/src/RoomScheduler.cpp project/headers/RoomScheduler.h
-        project/src/MongoConnector.cpp project/headers/MongoConnector.h project/src/RoomTextBuilder.cpp project/headers/RoomTextBuilder.h project/headers/TextBuilder.h)
+        project/src/MongoConnector.cpp project/headers/MongoConnector.h
+        project/src/RoomTextBuilder.cpp project/headers/TextBuilder.h
+        project/headers/RoomTextBuilder.h
+        project/src/User.cpp project/headers/User.h
+        project/src/Symbol.cpp project/headers/Symbol.h
+        project/src/MsgContext.cpp project/headers/MsgContext.h)
 
 add_library(project_lib STATIC ${LIB_SOURCE_FILES})
 
