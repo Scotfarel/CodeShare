@@ -1,46 +1,42 @@
-#include "jsonUtility.h"
+#include "headers/jsonUtility.h"
 
 void jsonUtility::to_json(json &j, const std::string &op, const std::string &resp) {
     j = json{
             {"operation", op},
-            {"content", {
-                {"response", resp}
-            }}
+            {"content", {{"response", resp}}}
     };
 }
 
 void jsonUtility::to_json(json &j, const std::string &op, const std::string &user, const std::string &pass) {
     j = json{
             {"operation", op},
-            {"content", {
-                {"username", user},
-                {"password", pass}
-            }}
+            {"content", {{"username", user},
+                         {"password", pass} }}
     };
 }
 
 void jsonUtility::to_json_insertion(json &j, const std::string &op, const symbol &symbol, const int &indexInEditor) {
     j = json{
-        {"operation", op},
-        {"id", symbol.getId()},
-        {"pos", symbol.getPos()},
-        {"letter", symbol.getLetter()},
-        {"indexInEditor", indexInEditor}
+            {"operation", op},
+            {"id", symbol.getId()},
+            {"pos", symbol.getPos()},
+            {"letter", symbol.getLetter()},
+            {"indexInEditor", indexInEditor}
     };
 }
 
 void jsonUtility::to_json_FormattingSymbol(json &j, const symbol &symbol) {
     j = json{
-        {"id", symbol.getId()},
-        {"pos", symbol.getPos()},
-        {"letter", symbol.getLetter()},
+            {"id", symbol.getId()},
+            {"pos", symbol.getPos()},
+            {"letter", symbol.getLetter()},
     };
 }
 
 void jsonUtility::to_json_cursor_change_req(json &j, const std::string &op, const int &index) {
     j = json {
-        {"operation", op},
-        {"index", index}
+            {"operation", op},
+            {"index", index}
     };
 }
 
@@ -51,73 +47,12 @@ void jsonUtility::to_json_removal_range(json &j, const std::string &op, const st
     };
 }
 
-void jsonUtility::to_json_format_range(json &j, const std::string &op, const std::vector<sId> &symbolsId, const int &format) {
-    j = json{
-            {"operation", op},
-            {"symbolsId", symbolsId},
-            {"format", format}
-    };
-}
-
-void jsonUtility::to_json_fontsize_change(json &j, const std::string &op, const std::vector<sId> &symbolsId, const int &fontSize) {
-    j = json{
-            {"operation", op},
-            {"symbolsId", symbolsId},
-            {"fontSize", fontSize}
-    };
-}
-
-void jsonUtility::to_json_alignment_change(json &j, const std::string &op, const std::vector<sId> &symbolsId, const int &alignment) {
-    j = json{
-            {"operation", op},
-            {"symbolsId", symbolsId},
-            {"alignment", alignment}
-    };
-}
-
-void jsonUtility::to_json_fontfamily_change(json &j, const std::string &op, const std::vector<sId> &symbolsId, const std::string &fontFamily) {
-    j = json{
-            {"operation", op},
-            {"symbolsId", symbolsId},
-            {"fontFamily", fontFamily}
-    };
-}
-
-void jsonUtility::to_json_collab_colors(json &j, const std::string &op, const std::string &uri) {
-    j = json{
-        {"operation", op},
-        {"uri", uri}
-    };
-}
-
-void jsonUtility::to_jsonFilename(json &j, const std::string &op, const std::string &user, const std::string &filename) {
-    j = json{
-            {"operation", op},
-            {"content", {
-                {"username", user},
-                {"filename", filename}
-            }}
-    };
-}
-
-void jsonUtility::to_jsonRenamefile(json &j, const std::string &op, const std::string &nameFile, const std::string &uri, const std::string &username) {
-    j = json{
-            {"operation", op},
-            {"content", {
-                {"newNameFile", nameFile},
-                {"uri", uri},
-                {"username", username}
-            }}
-    };
-}
 
 void jsonUtility::to_jsonUri(json &j, const std::string &op, const std::string &user, const std::string &uri) {
     j = json{
             {"operation", op},
-            {"content", {
-                {"username", user},
-                {"uri", uri}
-            }}
+            {"content", {{"username", user},
+                         {"uri", uri}}}
     };
 }
 
@@ -133,22 +68,12 @@ void jsonUtility::to_json_inviteURI(json &j, const std::string &op, const std::s
 void jsonUtility::to_json(json &j, const std::string &op, const std::string &user, const std::string &pass, const std::string &email) {
     j = json{
             {"operation", op},
-            {"content", {
-                {"username", user},
-                {"password", pass},
-                {"email", email}
-            }}
+            {"content", {{"username", user},
+                          {"password", pass},
+                          {"email", email} }}
     };
 }
 
-void jsonUtility::to_jsonUser(json &j, const std::string &op, const std::string &user) {
-    j = json{
-            {"operation", op},
-            {"content", {
-                {"username", user}
-            }}
-    };
-}
 
 void jsonUtility::to_json_insertion_range(json &j, const std::string &op, const std::vector<json> &symVector, const int &startIndex) {
     j = json{
@@ -166,27 +91,23 @@ void jsonUtility::from_json_inviteURI(const json &j, std::string &op) {
     op = j.at("content").at("response").get<std::string>();
 }
 
-void jsonUtility::from_json_collab_colors_map(const json &j, std::string &op) {
-    op = j.at("response").get<std::string>();
-}
-
 void jsonUtility::from_json_resp(const json &j, std::string &resp) {
     resp = j.at("content").at("response").get<std::string>();
 }
 
 /* We need to use this 'from_json' to deserialize std::vector<symbol> (see function from_json_symbols) */
 void from_json(const json& j, symbol& s) {
-    wchar_t letter = j.at("letter").get<wchar_t>();
-    std::pair<int,int> id = j.at("id").get<std::pair<int,int>>();
-    std::vector<int> pos = j.at("pos").get<std::vector<int>>();
+    auto letter = j.at("letter").get<wchar_t>();
+    auto id = j.at("id").get<std::pair<int,int>>();
+    auto pos = j.at("pos").get<std::vector<int>>();
     s = symbol(letter, id, pos);
 }
 
 void jsonUtility::from_json_insertion(const json& j, symbol& s, int &indexInEditor) {
     indexInEditor = j.at("indexInEditor").get<int>();
-    wchar_t letter = j.at("letter").get<wchar_t>();
-    std::pair<int,int> id = j.at("id").get<std::pair<int,int>>();
-    std::vector<int> pos = j.at("pos").get<std::vector<int>>();
+    auto letter = j.at("letter").get<wchar_t>();
+    auto id = j.at("id").get<std::pair<int,int>>();
+    auto pos = j.at("pos").get<std::vector<int>>();
     s = symbol(letter, id, pos);
 }
 
@@ -291,15 +212,6 @@ void jsonUtility::from_json_cursor_change(const json &j, std::string& username, 
     pos = j.at("pos").get<int>();
 }
 
-void jsonUtility::from_json_collab_colors_resp(const json &j, myCollabColorsMap& collabColorsMap) {
-    collabColorsMap = j.at("collabColorsMap").get<myCollabColorsMap>();
-}
-
-void jsonUtility::from_json_user_offline(const json &j, std::string &username, myCollabColorsMap& collabColorsMap) {
-    username = j.at("username").get<std::string>();
-    collabColorsMap = j.at("collabColorsMap").get<myCollabColorsMap>();
-}
-
 void jsonUtility::from_json_removal_range(const json &j, std::vector<sId>& symbolsId) {
     symbolsId = j.at("symbolsId").get<std::vector<sId>>();
 }
@@ -309,7 +221,6 @@ std::vector<json> jsonUtility::fromFormattingSymToJson(const std::vector<symbol>
     if(symbols.empty())
         return json::array();
 
-    // Get jsons from symbols
     std::vector<json> jsons;
     for (auto const &sym: symbols) {
         json j;
