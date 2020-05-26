@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.13)
 project(TextEditor)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -pthread")
 set(CMAKE_CXX_STANDARD 17)
@@ -7,7 +7,7 @@ set(CMAKE_AUTOMOC YES)
 set(CMAKE_AUTOUIC YES)
 set(CMAKE_AUTORCC YES)
 
-set(SOURCES
+set(SOURCES main.cpp
         src/File.cpp
         headers/File.h
         MyQTextEdit.h
@@ -19,7 +19,7 @@ set(SOURCES
         editorwindow.ui
         src/jsonUtility.cpp
         headers/jsonUtility.h
-        main.cpp
+
         src/message.cpp
         headers/message.h
         myClient.cpp

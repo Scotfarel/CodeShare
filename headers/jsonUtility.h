@@ -13,7 +13,6 @@ public:
     static void to_json(json &j, const std::string &op, const std::string &resp);
     static void to_json(json& j, const std::string& op, const std::string& user, const std::string& pass);
     static void to_jsonUri(json& j, const std::string& op, const std::string& user, const std::string& uri);
-    static void to_json_inviteURI(json& j, const std::string& op, const std::string& invited, const std::string& applicant, const std::string& uri);
     static void to_json(json& j, const std::string& op, const std::string& user, const std::string& pass, const std::string& email);
     static void to_json_insertion(json &j, const std::string &op, const symbol &symbol, const int &indexInEditor);
     static void to_json_cursor_change_req(json &j, const std::string &op, const int &index);
@@ -24,16 +23,9 @@ public:
 //DESERIALIZATION (convert data into json) -> it is obtained with method parse() (e.g. json::parse(data_));
     static void from_json_insertion(const json& j, symbol& s, int &indexInEditor);
     static void from_json(const json& j, std::string& op);
-    static void from_json_inviteURI(const json& j, std::string& op);
-    static void from_json_rename_file(const json &j, std::string &resp, std::string& filename);
     static void from_json_resp(const json &j, std::string &resp);
     static void from_json_symbols(const json &j, std::vector<symbol> &symbols);
-    static void from_json_symbolsAndFilename(const json &j, std::vector<symbol> &symbols, std::string& filename);
-    static void from_json_filename(const json &j, std::string& filename);
-    static void from_json_files(const json &j, std::vector<json> &jsonFiles);
-    static File* from_json_file(const json &j);
     static symbol* from_json_symbol(const json &j);
-    static void from_json_usernameLogin(const json &j, std::string &name, std::string &color, std::string &mail, int &siteId);
     static void from_jsonUri(const json& j, std::string& uri);
     static void from_json(const json& j, std::string& user, std::string& pass);
     static void from_json(const json &j, std::string &user, std::string &pass, std::string &email);

@@ -56,15 +56,6 @@ void jsonUtility::to_jsonUri(json &j, const std::string &op, const std::string &
     };
 }
 
-void jsonUtility::to_json_inviteURI(json &j, const std::string &op, const std::string &invited, const std::string &applicant, const std::string &uri) {
-    j = json{
-            {"operation", op},
-            {"invited", invited},
-            {"applicant", applicant},
-            {"uri", uri}
-    };
-}
-
 void jsonUtility::to_json(json &j, const std::string &op, const std::string &user, const std::string &pass, const std::string &email) {
     j = json{
             {"operation", op},
@@ -85,10 +76,6 @@ void jsonUtility::to_json_insertion_range(json &j, const std::string &op, const 
 
 void jsonUtility::from_json(const json &j, std::string &op) {
     op = j.at("operation").get<std::string>();
-}
-
-void jsonUtility::from_json_inviteURI(const json &j, std::string &op) {
-    op = j.at("content").at("response").get<std::string>();
 }
 
 void jsonUtility::from_json_resp(const json &j, std::string &resp) {
@@ -115,27 +102,9 @@ void jsonUtility::from_json_symbols(const json &j, std::vector<symbol>& symbols)
     symbols = j.at("content").at("symVector").get<std::vector<symbol>>(); //use from_json previously defined
 }
 
-void jsonUtility::from_json_symbolsAndFilename(const json &j, std::vector<symbol>& symbols, std::string& filename) {
-    filename = j.at("content").at("filename").get<std::string>();
-    symbols = j.at("content").at("symVector").get<std::vector<symbol>>(); //use from_json previously defined
-}
-
-void jsonUtility::from_json_filename(const json &j, std::string& filename) {
-    filename = j.at("content").at("filename").get<std::string>();
-}
-
 void jsonUtility::from_json_insertion_range(const json &j, int& firstIndex, std::vector<json>& jsonSymbols) {
     firstIndex = j.at("firstIndexRange").get<int>();
     jsonSymbols = j.at("symbols").get<std::vector<json>>();
-}
-
-void jsonUtility::from_json_rename_file(const json &j, std::string &resp, std::string& filename) {
-    filename = j.at("content").at("filename").get<std::string>();
-    resp = j.at("content").at("response").get<std::string>();
-}
-
-void jsonUtility::from_json_files(const json &j, std::vector<json>& jsonFiles) {
-    jsonFiles = j.at("content").at("vectorFile").get<std::vector<json>>();
 }
 
 symbol* jsonUtility::from_json_symbol(const json &j) {
@@ -158,34 +127,6 @@ symbol* jsonUtility::from_json_symbol(const json &j) {
     return s;
 }
 
-File* jsonUtility::from_json_file(const json &j) {
-    std::string idfile;
-    std::string filename;
-    std::string owner;
-    std::string timestamp;
-
-    try {
-        //get symbol values from json
-        idfile = j.at("idfile").get<std::string>();
-        filename = j.at("filename").get<std::string>();
-        owner = j.at("owner").get<std::string>();
-        timestamp = j.at("timestamp").get<std::string>();
-
-    } catch (json::exception& e) {
-        std::cerr << "Message: " << e.what() << '\n' << "exception id: " << e.id << std::endl;
-        return nullptr;
-    }
-    //now create the file
-    File *f = new File(idfile, filename, owner, timestamp);
-    return f;
-}
-
-void jsonUtility::from_json_usernameLogin(const json &j, std::string &name, std::string &color, std::string &mail, int &siteId) {
-    name = j.at("content").at("usernameLogin").get<std::string>();
-    color = j.at("content").at("colorLogin").get<std::string>();
-    mail = j.at("content").at("mailLogin").get<std::string>();
-    siteId = j.at("content").at("siteId").get<int>();
-}
 
 void jsonUtility::from_json(const json &j, std::string &user, std::string &pass) {
     user = j.at("content").at("username").get<std::string>();

@@ -34,16 +34,10 @@ public:
     void do_connect();
     bool getStatus();
     QString getUsername();
-    QString getMail();
     QString getFilename();
     QString getFileURI();
-    QString getColor();
-    std::vector<File> getVectorFile();
     void setUsername(QString name);
-    void setMail(QString mail);
-    void setFilename(QString filename);
     void setFileURI(QString uri);
-    void setColor(QString color);
     void setVectorFile(std::vector<File> fileVector);
     void close();
     void write(const message& msg);
@@ -64,7 +58,6 @@ signals:
     void jsonMsgFailure(QString windowName, QString msg);
     void removeRemoteCursor(std::string username);
     void changeRemoteCursor(std::string username, std::string color, int pos);
-    void showCollabColorsMap(myCollabColorsMap collabColorsMap);
 
 private:
     boost::asio::io_context io_context_;
@@ -80,7 +73,7 @@ private:
     void do_write();
     void closeConnection();
     void emitMsgInCorrectWindow();
-    bool status;
+    bool status{};
     QString username_;
     QString filename_;
     QString uri_;
