@@ -1,4 +1,5 @@
-#pragma once
+#ifndef HEADERS_CRDT_H_
+#define HEADERS_CRDT_H_
 #include <vector>
 #include "symbol.h"
 #include <QDebug>
@@ -7,7 +8,7 @@ typedef std::pair<int,int> sId;
 
 class CRDT {
 
-public:
+ public:
     CRDT() = default;
     virtual ~CRDT() = default;
     symbol localInsert(int index, wchar_t value);
@@ -24,13 +25,15 @@ public:
     int getSiteId();
     std::vector<symbol> getSymbols();
 
-private:
+ private:
     std::vector<symbol> _symbols;
     int _counter = 0;
     int _siteId;
     std::vector<int> generatePos(int index);
     std::vector<int> generatePosBetween(std::vector<int> pos1, std::vector<int> pos2, std::vector<int> newPos = {});
-    int comparePosdx(std::vector<int> curSymPos, std::pair<int,int> curSymId, std::vector<int> newSymPos, std::pair<int,int> newSymId, int posIndex);
-    int comparePos(std::vector<int> curSymPos, std::pair<int,int> curSymId, std::vector<int> newSymPos, std::pair<int,int> newSymId, int posIndex);
-
+    int comparePosdx(std::vector<int> curSymPos, std::pair<int, int> curSymId, std::vector<int> newSymPos,
+            std::pair<int, int> newSymId, int posIndex);
+    int comparePos(std::vector<int> curSymPos, std::pair<int, int> curSymId, std::vector<int> newSymPos,
+            std::pair<int, int> newSymId, int posIndex);
 };
+#endif  // HEADERS_CRDT_H_

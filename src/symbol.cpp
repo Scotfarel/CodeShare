@@ -2,7 +2,7 @@
 #include <utility>
 
 symbol::symbol(wchar_t character, std::pair<int, int> id, std::vector<int> pos)
-    : _letter(character), _id(std::move(id)), _pos(std::move(pos)){}
+    : _letter(character), _id(std::move(id)), _pos(std::move(pos)) {}
 
 symbol::symbol(wchar_t character)
     : _letter(character) {}

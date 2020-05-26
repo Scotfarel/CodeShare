@@ -1,11 +1,11 @@
-#pragma once
+#ifndef HEADERS_MESSAGE_H_
+#define HEADERS_MESSAGE_H_
 #include <string>
 #include <iostream>
 #define MAX_CHUNK_LENGTH 65000
 
 class message {
-
-public:
+ public:
     enum { header_length = 5 };
     message();
     const char* data() const;
@@ -22,9 +22,10 @@ public:
     void setLastChunk(char val);
     static message constructMsg(const std::string& chunkResponse, char isLastChunk);
 
-private:
+ private:
     char data_[MAX_CHUNK_LENGTH + header_length + 1];
     std::size_t body_length_;
     char isLastChunk;
 };
+#endif  // HEADERS_MESSAGE_H_
 

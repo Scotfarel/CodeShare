@@ -1,5 +1,5 @@
-#ifndef MYCLIENT_H
-#define MYCLIENT_H
+#ifndef HEADERS_MYCLIENT_H_
+#define HEADERS_MYCLIENT_H_
 
 #include <boost/asio.hpp>
 #include <QString>
@@ -18,13 +18,12 @@
 
 using boost::asio::ip::tcp;
 typedef std::deque<message> message_queue;
-typedef std::pair<int,int> sId;
+typedef std::pair<int, int> sId;
 
-class myClient : public QObject
-{
+class myClient : public QObject {
     Q_OBJECT
 
-public:
+ public:
     myClient();
     virtual ~myClient();
     CRDT Crdt;
@@ -37,7 +36,7 @@ public:
     void write(const message& msg);
     void sendRequestMsg(std::string request);
 
-signals:
+ signals:
     void statusChanged(bool);
     void formResultSuccess(QString result);
     void formResultFailure(QString result);
@@ -53,7 +52,7 @@ signals:
     void removeRemoteCursor(std::string username);
     void changeRemoteCursor(std::string username, std::string color, int pos);
 
-private:
+ private:
     boost::asio::io_context io_context_;
     std::shared_ptr<boost::asio::io_context::work> work_;
     std::thread worker_;
@@ -73,4 +72,4 @@ private:
     std::vector<File> fileVector_;
 };
 
-#endif // MYCLIENT_H
+#endif  // HEADERS_MYCLIENT_H_

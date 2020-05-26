@@ -65,11 +65,10 @@ void jsonUtility::to_json(json &j, const std::string &op, const std::string &use
     };
 }
 
-
 void jsonUtility::to_json_insertion_range(json &j, const std::string &op, const std::vector<json> &symVector, const int &startIndex) {
     j = json{
             {"operation", op},
-            {"formattingSymVector", symVector}, //JSON vector
+            {"formattingSymVector", symVector},  // JSON vector
             {"startIndex", startIndex}
     };
 }
@@ -85,7 +84,7 @@ void jsonUtility::from_json_resp(const json &j, std::string &resp) {
 /* We need to use this 'from_json' to deserialize std::vector<symbol> (see function from_json_symbols) */
 void from_json(const json& j, symbol& s) {
     auto letter = j.at("letter").get<wchar_t>();
-    auto id = j.at("id").get<std::pair<int,int>>();
+    auto id = j.at("id").get<std::pair<int, int>>();
     auto pos = j.at("pos").get<std::vector<int>>();
     s = symbol(letter, id, pos);
 }
@@ -93,13 +92,13 @@ void from_json(const json& j, symbol& s) {
 void jsonUtility::from_json_insertion(const json& j, symbol& s, int &indexInEditor) {
     indexInEditor = j.at("indexInEditor").get<int>();
     auto letter = j.at("letter").get<wchar_t>();
-    auto id = j.at("id").get<std::pair<int,int>>();
+    auto id = j.at("id").get<std::pair<int, int>>();
     auto pos = j.at("pos").get<std::vector<int>>();
     s = symbol(letter, id, pos);
 }
 
 void jsonUtility::from_json_symbols(const json &j, std::vector<symbol>& symbols) {
-    symbols = j.at("content").at("symVector").get<std::vector<symbol>>(); //use from_json previously defined
+    symbols = j.at("content").at("symVector").get<std::vector<symbol>>();  // use from_json previously defined
 }
 
 void jsonUtility::from_json_insertion_range(const json &j, int& firstIndex, std::vector<json>& jsonSymbols) {
@@ -109,11 +108,11 @@ void jsonUtility::from_json_insertion_range(const json &j, int& firstIndex, std:
 
 symbol* jsonUtility::from_json_symbol(const json &j) {
     wchar_t letter;
-    std::pair<int,int> id;
+    std::pair<int, int> id;
     std::vector<int> pos;
 
     try {
-        //get symbol values from json
+        // get symbol values from json
         letter = j.at("letter").get<wchar_t>();
         id = j.at("id").get<std::pair<int, int>>();
         pos = j.at("pos").get<std::vector<int>>();
@@ -122,7 +121,6 @@ symbol* jsonUtility::from_json_symbol(const json &j) {
         std::cerr << "Message: " << e.what() << '\n' << "exception id: " << e.id << std::endl;
         return nullptr;
     }
-    //now create the symbol
     symbol *s = new symbol(letter, id, pos);
     return s;
 }
@@ -159,13 +157,13 @@ void jsonUtility::from_json_removal_range(const json &j, std::vector<sId>& symbo
 
 
 std::vector<json> jsonUtility::fromFormattingSymToJson(const std::vector<symbol>& symbols) {
-    if(symbols.empty())
+    if (symbols.empty())
         return json::array();
 
     std::vector<json> jsons;
-    for (auto const &sym: symbols) {
+    for (auto const &sym : symbols) {
         json j;
-        jsonUtility::to_json_FormattingSymbol(j, sym); //convert sym into json
+        jsonUtility::to_json_FormattingSymbol(j, sym);
         jsons.push_back(j);
     }
     return jsons;

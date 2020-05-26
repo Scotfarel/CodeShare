@@ -46,7 +46,6 @@ void NoteBook::setupTextEdit() {
 void NoteBook::setupFirstLetter() {
     QString user = _client->getUsername();
     ui->labelUser->setText(user);
-
     QChar firstLetter;
     for (int i = 0; i < user.length(); i++) {
         firstLetter = user.at(i);
@@ -79,13 +78,11 @@ void NoteBook::on_RealTextEdit_textChanged() {
 }
 
 bool NoteBook::eventFilter(QObject *obj, QEvent *ev) {
-
     if (ev->type() == QEvent::KeyPress) {
         QKeyEvent *keyEvent = static_cast<QKeyEvent *>(ev);
         qDebug() << "You Pressed Key " + keyEvent->text();
         int key = keyEvent->key();
         Qt::KeyboardModifiers modifiers = keyEvent->modifiers();
-        QList<Qt::Key> modifiersList;
 
 if ((key == Qt::Key_Q) && (modifiers == Qt::ControlModifier) && QApplication::keyboardModifiers()) {
             on_actionClose_triggered();
@@ -93,8 +90,7 @@ if ((key == Qt::Key_Q) && (modifiers == Qt::ControlModifier) && QApplication::ke
         }
         /* Trigger these shortcuts only if you are inside doc */
         if (obj == ui->RealTextEdit) {
-            if (!keyEvent->text().isEmpty()) { //to ignore chars like "CAPS_LOCK", "SHIFT", "CTRL", etc...
-                //************************************************* CTRL-X *************************************************
+            if (!keyEvent->text().isEmpty()) {
                 if (keyEvent->matches(QKeySequence::Cut)) {
                     QTextCursor cursor = ui->RealTextEdit->textCursor();
                     if (cursor.hasSelection()) {
@@ -106,59 +102,51 @@ if ((key == Qt::Key_Q) && (modifiers == Qt::ControlModifier) && QApplication::ke
                         removeCharRequest(symbolsId);
                     }
                     return QObject::eventFilter(obj, ev);
-                } //*********************************************** CTRL-C *************************************************
-                else if (keyEvent->matches(QKeySequence::Copy)) {
-                    return false; //let the original handler handle this sequence
-                } //*********************************************** CTRL-V *************************************************
-                else if (keyEvent->matches(QKeySequence::Paste)) {
+                } else if (keyEvent->matches(QKeySequence::Copy)) {
+                    return false;  // let the original handler handle this sequence
+                } else if (keyEvent->matches(QKeySequence::Paste)) {
             QTextCursor cursor = ui->RealTextEdit->textCursor();
             int pos;
             bool hasSelection = false;
 
             cursor.hasSelection() ? pos = cursor.selectionStart() : pos = cursor.position();
             try {
-                if(cursor.hasSelection()) {
+                if (cursor.hasSelection()) {
                     hasSelection = true;
                     int startIndex = cursor.selectionStart();
                     int endIndex = cursor.selectionEnd();
-
-                    //Update symbols of the client
+                    // Update symbols of the client
                     std::vector<sId> symbolsId = _client->Crdt.localErase(startIndex, endIndex);
-
                     removeCharRequest(symbolsId);
                 }
                 insertCharRangeRequest(pos, hasSelection);
             } catch(OperationNotSupported& ex) {
                 qDebug() << ex.what();
                 cursor.removeSelectedText();
-                return true; //not paste text
+                return true;  // not paste text
             }
             return QObject::eventFilter(obj, ev);
-                } //*********************************************** CTRL-A *************************************************
-                else if (keyEvent->matches(QKeySequence::SelectAll)) {
+                }  else if (keyEvent->matches(QKeySequence::SelectAll)) {
                     return false;
-                }
-                    // ******************************************** ALL THE OTHER CTRL COMBINATION ****************************
-                else if ((modifiers & Qt::ControlModifier) && !(key == Qt::Key_BracketLeft) &&
+                } else if ((modifiers & Qt::ControlModifier) && !(key == Qt::Key_BracketLeft) &&
                          !(key == Qt::Key_BracketRight)
                          && !(key == Qt::Key_BraceLeft) && !(key == Qt::Key_BraceRight) && !(key == Qt::Key_At) &&
                          !(key == Qt::Key_NumberSign)) {
                     qDebug() << "Operation Not Supported";
                     return true;
-                } //******************************************** ANY DIGIT *************************************************
-                else if (!(key == Qt::Key_Backspace) && !(key == Qt::Key_Delete) && !(key == Qt::Key_Escape)) {
-                    //Get data
+                } else if (!(key == Qt::Key_Backspace) && !(key == Qt::Key_Delete) && !(key == Qt::Key_Escape)) {
+                    // Get data
                     std::pair<int, wchar_t> tuple;
                     QTextCursor cursor = ui->RealTextEdit->textCursor();
                     int pos;
 
-                    if (cursor.hasSelection()) { //Remove range of characters selected
+                    if (cursor.hasSelection()) {  // Remove range of characters selected
                         pos = cursor.selectionStart();
                         int startIndex = cursor.selectionStart();
                         int endIndex = cursor.selectionEnd();
                         QTextCursor tempCursor = cursor;
 
-                        //get properties of the first char of the selection
+                        // get properties of the first char of the selection
                         tempCursor.beginEditBlock();
                         tempCursor.setPosition(startIndex + 1, QTextCursor::MoveAnchor);
                         tempCursor.endEditBlock();
@@ -166,7 +154,7 @@ if ((key == Qt::Key_Q) && (modifiers == Qt::ControlModifier) && QApplication::ke
                         QTextCharFormat f;
                         QTextBlockFormat textBlockFormat;
 
-                        //apply format
+                        // apply format
                         cursor.beginEditBlock();
                         cursor.setPosition(startIndex, QTextCursor::MoveAnchor);
                         cursor.setPosition(endIndex, QTextCursor::KeepAnchor);
@@ -176,37 +164,32 @@ if ((key == Qt::Key_Q) && (modifiers == Qt::ControlModifier) && QApplication::ke
                         ui->RealTextEdit->setTextCursor(cursor);
                         cursor.endEditBlock();
 
-                        //update symbols of the client
+                        // update symbols of the client
                         std::vector<sId> symbolsId = _client->Crdt.localErase(startIndex, endIndex);
 
-                        //Serialize data
+                        // Serialize data
                         json j;
                         jsonUtility::to_json_removal_range(j, "REMOVAL_REQUEST", symbolsId);
                         const std::string req = j.dump();
 
-                        //Send data (header and body)
+                        // Send data (header and body)
                         _client->sendRequestMsg(req);
                     } else {
                         pos = cursor.position();
                     }
-
-                    //update textedit formats
+                    // update textedit formats
                     wchar_t c = keyEvent->text().toStdWString().c_str()[0];
-
-
-
-                    //update symbols of the client
+                    // update symbols of the client
                     symbol s = _client->Crdt.localInsert(pos, c);
 
-                    //Serialize data
+                    // Serialize data
                     json j;
                     jsonUtility::to_json_insertion(j, "INSERTION_REQUEST", s, pos);
                     const std::string req = j.dump();
 
                     _client->sendRequestMsg(req);
                     return QObject::eventFilter(obj, ev);
-                } //******************************************** BACKSPACE *************************************************
-                else if (key == Qt::Key_Backspace) {
+                } else if (key == Qt::Key_Backspace) {
                     QTextCursor cursor = ui->RealTextEdit->textCursor();
                     int pos = cursor.position();
 
@@ -225,14 +208,11 @@ if ((key == Qt::Key_Q) && (modifiers == Qt::ControlModifier) && QApplication::ke
 
                         removeCharRequest(symbolsId);
                     } else if (pos > 0) {
-
                         std::vector<sId> symbolsId = _client->Crdt.localErase(pos - 1, pos);
-
                         removeCharRequest(symbolsId);
                     }
                     return QObject::eventFilter(obj, ev);
-                }
-                else if (key == Qt::Key_Delete) {
+                } else if (key == Qt::Key_Delete) {
                     QTextCursor cursor = ui->RealTextEdit->textCursor();
                     int pos = cursor.position();
 
@@ -246,9 +226,7 @@ if ((key == Qt::Key_Q) && (modifiers == Qt::ControlModifier) && QApplication::ke
                         cursor.mergeBlockFormat(textBlockFormat);
                         ui->RealTextEdit->setAlignment(textBlockFormat.alignment());
                         cursor.setPosition(pos);
-
-
-                        //Update symbols of the client
+                        // Update symbols of the client
                         std::vector<sId> symbolsId = _client->Crdt.localErase(startIndex, endIndex);
 
                         removeCharRequest(symbolsId);
@@ -258,16 +236,15 @@ if ((key == Qt::Key_Q) && (modifiers == Qt::ControlModifier) && QApplication::ke
                         removeCharRequest(symbolsId);
                     }
                     return QObject::eventFilter(obj, ev);
-                } //********************************************* ESC ******************************************************
-                else if (key == Qt::Key_Escape) {
-                    return true; //do not handle ESC
+                } else if (key == Qt::Key_Escape) {
+                    return true;  // do not handle ESC
                 }
-            } else
+            } else {
                 return QObject::eventFilter(obj, ev);
-            return false; //or return QObject::eventFilter(obj, ev);
+            }
         }
     }
-    return false; //or return QObject::eventFilter(obj, ev);
+    return false;  // or return QObject::eventFilter(obj, ev);
 }
 
 void NoteBook::on_actionClose_triggered() {
@@ -275,8 +252,7 @@ void NoteBook::on_actionClose_triggered() {
 }
 
 void NoteBook::CloseDocumentRequest() {
-
-    //Get data from the form
+    // Get data from the form
     QString user = this->_client->getUsername();
     QByteArray ba_user = user.toLocal8Bit();
     const char *c_user = ba_user.data();
@@ -284,12 +260,12 @@ void NoteBook::CloseDocumentRequest() {
     QByteArray ba_uri = uri.toLocal8Bit();
     const char *c_uri = ba_uri.data();
 
-    //Serialize data
+    // Serialize data
     json j;
     jsonUtility::to_jsonUri(j, "LOGOUTURI_REQUEST", c_user, c_uri);
     const std::string req = j.dump();
 
-    //Send data (header and body)
+    // Send data (header and body)
     _client->sendRequestMsg(req);
 }
 
@@ -299,7 +275,7 @@ void NoteBook::showSymbolsAt(int firstIndex, std::vector<symbol> symbols) {
     QTextCursor c = ui->RealTextEdit->textCursor();
 
     c.beginEditBlock();
-            foreach (symbol s, symbols) {
+            foreach(symbol s, symbols) {
             letter = s.getLetter();
             QTextCharFormat newFormat;
             QTextBlockFormat newBlockFormat;
@@ -309,7 +285,7 @@ void NoteBook::showSymbolsAt(int firstIndex, std::vector<symbol> symbols) {
             c.hasSelection() ? endIndex = c.selectionEnd() : endIndex = -90;
             int oldPos = pos < c.position() ? c.position() + 1 : c.position();
 
-            //if user2 insert a char at the end of the selection of user1 -> this can cause extension of user1's selection (that is wrong)
+            // if user2 insert a char at the end of the selection of user1 -> this can cause extension of user1's selection (that is wrong)
             if (c.hasSelection() && pos == endIndex) {
                 int startIndex = c.selectionStart();
 
@@ -352,7 +328,7 @@ void NoteBook::showSymbol(std::pair<int, wchar_t> tuple) {
     cursor.hasSelection() ? endIndex = cursor.selectionEnd() : endIndex = -90;
     int oldPos = pos < cursor.position() ? cursor.position() + 1 : cursor.position();
 
-    //if user2 insert a char at the end of the selection of user1 -> this can cause extension of user1's selection (that is wrong)
+    // if user2 insert a char at the end of the selection of user1 -> this can cause extension of user1's selection (that is wrong)
     if (cursor.hasSelection() && pos == endIndex) {
         int startIndex = cursor.selectionStart();
 
@@ -423,16 +399,15 @@ void NoteBook::insertCharRangeRequest(int pos, bool cursorHasSelection) noexcept
 
     if (mimeData->hasText() && !mimeData->hasImage() && !mimeData->hasUrls() && !mimeData->html().contains("<a href")) {
         /* Get chars from clipboard mimeData */
-        int numChars = mimeData->text().size(); //number of chars = number of iterations
+        int numChars = mimeData->text().size();  // number of chars = number of iterations
         std::wstring str_to_paste = mimeData->text().toStdWString();
 
-        std::vector<symbol> infoSymbols; //temporary vector without symbol pos (it will be used by the process)
+        std::vector<symbol> infoSymbols;  // temporary vector without symbol pos (it will be used by the process)
         int index;
         wchar_t c;
         int initialPos = pos;
         std::vector<symbol> symbols = _client->Crdt.localInsert(initialPos, infoSymbols);
-
-        //Serialize data
+        // Serialize data
         json j;
         std::vector<json> symFormattingVectorJSON = jsonUtility::fromFormattingSymToJson(symbols);
         jsonUtility::to_json_insertion_range(j, "INSERTIONRANGE_REQUEST", symFormattingVectorJSON, initialPos);
@@ -446,6 +421,5 @@ void NoteBook::goodbyeClient() {
     if (_client->getStatus() == false) {
         QMessageBox::warning(nullptr, "Attention",
                              "Cant reach server \n\nApplication needs to be closed");
-//        QApplication::exit(-1000);
     }
 }

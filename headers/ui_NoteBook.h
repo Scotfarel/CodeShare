@@ -6,8 +6,8 @@
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
 
-#ifndef UI_NOTEBOOK_H
-#define UI_NOTEBOOK_H
+#ifndef HEADERS_UI_NOTEBOOK_H_
+#define HEADERS_UI_NOTEBOOK_H_
 
 #include <QtCore/QVariant>
 #include <QtWidgets/QAction>
@@ -24,9 +24,8 @@
 
 QT_BEGIN_NAMESPACE
 
-class Ui_NoteBook
-{
-public:
+class Ui_NoteBook {
+ public:
     QAction *actionNew;
     QAction *actionSave;
     QAction *actionFullscreen;
@@ -73,8 +72,7 @@ public:
     QSpacerItem *verticalSpacer_8;
     QSpacerItem *verticalSpacer_9;
 
-    void setupUi(QMainWindow *NoteBook)
-    {
+    void setupUi(QMainWindow *NoteBook) {
         if (NoteBook->objectName().isEmpty())
             NoteBook->setObjectName(QString::fromUtf8("NoteBook"));
         NoteBook->resize(950, 604);
@@ -377,91 +375,89 @@ public:
         retranslateUi(NoteBook);
 
         QMetaObject::connectSlotsByName(NoteBook);
-    } // setupUi
+    }  // setupUi
 
-    void retranslateUi(QMainWindow *NoteBook)
-    {
+    void retranslateUi(QMainWindow *NoteBook) {
         NoteBook->setWindowTitle(QApplication::translate("NoteBook", "MainWindow", nullptr));
         actionNew->setText(QApplication::translate("NoteBook", "Nuovo Documento", nullptr));
 #ifndef QT_NO_SHORTCUT
         actionNew->setShortcut(QApplication::translate("NoteBook", "Ctrl+N", nullptr));
-#endif // QT_NO_SHORTCUT
+#endif  // QT_NO_SHORTCUT
         actionSave->setText(QApplication::translate("NoteBook", "Salva", nullptr));
 #ifndef QT_NO_SHORTCUT
         actionSave->setShortcut(QApplication::translate("NoteBook", "Ctrl+S", nullptr));
-#endif // QT_NO_SHORTCUT
+#endif  // QT_NO_SHORTCUT
         actionFullscreen->setText(QApplication::translate("NoteBook", "Schermo Intero", nullptr));
 #ifndef QT_NO_TOOLTIP
         actionFullscreen->setToolTip(QApplication::translate("NoteBook", "Schermo Intero", nullptr));
-#endif // QT_NO_TOOLTIP
+#endif  // QT_NO_TOOLTIP
 #ifndef QT_NO_SHORTCUT
         actionFullscreen->setShortcut(QApplication::translate("NoteBook", "Ctrl+F11", nullptr));
-#endif // QT_NO_SHORTCUT
+#endif  // QT_NO_SHORTCUT
         actionAbout->setText(QApplication::translate("NoteBook", "?", nullptr));
 #ifndef QT_NO_SHORTCUT
         actionAbout->setShortcut(QApplication::translate("NoteBook", "Ctrl+H", nullptr));
-#endif // QT_NO_SHORTCUT
+#endif  // QT_NO_SHORTCUT
         actionClose->setText(QApplication::translate("NoteBook", "Chiudi Documento", nullptr));
 #ifndef QT_NO_SHORTCUT
         actionClose->setShortcut(QApplication::translate("NoteBook", "Ctrl+Q", nullptr));
-#endif // QT_NO_SHORTCUT
+#endif  // QT_NO_SHORTCUT
         actionInvita_tramite_URI->setText(QApplication::translate("NoteBook", "Invita tramite URI", nullptr));
         actionEsporta_come_PDF->setText(QApplication::translate("NoteBook", "Esporta come PDF", nullptr));
 #ifndef QT_NO_SHORTCUT
         actionEsporta_come_PDF->setShortcut(QApplication::translate("NoteBook", "Ctrl+S", nullptr));
-#endif // QT_NO_SHORTCUT
+#endif  // QT_NO_SHORTCUT
         actionRinomina->setText(QApplication::translate("NoteBook", "Rinomina", nullptr));
 #ifndef QT_NO_SHORTCUT
         actionRinomina->setShortcut(QApplication::translate("NoteBook", "Ctrl+R", nullptr));
-#endif // QT_NO_SHORTCUT
+#endif  // QT_NO_SHORTCUT
         actionDark_Mode->setText(QApplication::translate("NoteBook", "Modalit\303\240 Notte", nullptr));
 #ifndef QT_NO_TOOLTIP
         actionDark_Mode->setToolTip(QApplication::translate("NoteBook", "Modalit\303\240 Notte", nullptr));
-#endif // QT_NO_TOOLTIP
+#endif  // QT_NO_TOOLTIP
 #ifndef QT_NO_SHORTCUT
         actionDark_Mode->setShortcut(QApplication::translate("NoteBook", "Ctrl+D", nullptr));
-#endif // QT_NO_SHORTCUT
+#endif  // QT_NO_SHORTCUT
         actionCollaboratori->setText(QApplication::translate("NoteBook", "Nascondi Collaboratori", nullptr));
         actionGrassetto->setText(QApplication::translate("NoteBook", "Grassetto", nullptr));
 #ifndef QT_NO_SHORTCUT
         actionGrassetto->setShortcut(QApplication::translate("NoteBook", "Ctrl+B", nullptr));
-#endif // QT_NO_SHORTCUT
+#endif  // QT_NO_SHORTCUT
         actionCorsivo->setText(QApplication::translate("NoteBook", "Corsivo", nullptr));
 #ifndef QT_NO_SHORTCUT
         actionCorsivo->setShortcut(QApplication::translate("NoteBook", "Ctrl+I", nullptr));
-#endif // QT_NO_SHORTCUT
+#endif  // QT_NO_SHORTCUT
         actionSottolineato->setText(QApplication::translate("NoteBook", "Sottolineato", nullptr));
 #ifndef QT_NO_SHORTCUT
         actionSottolineato->setShortcut(QApplication::translate("NoteBook", "Ctrl+U", nullptr));
-#endif // QT_NO_SHORTCUT
+#endif  // QT_NO_SHORTCUT
         actionEsci->setText(QApplication::translate("NoteBook", "Esci", nullptr));
 #ifndef QT_NO_SHORTCUT
         actionEsci->setShortcut(QApplication::translate("NoteBook", "Ctrl+Shift+Q", nullptr));
-#endif // QT_NO_SHORTCUT
+#endif  // QT_NO_SHORTCUT
         actionSeleziona_Tutto->setText(QApplication::translate("NoteBook", "Seleziona Tutto", nullptr));
 #ifndef QT_NO_SHORTCUT
         actionSeleziona_Tutto->setShortcut(QApplication::translate("NoteBook", "Ctrl+A", nullptr));
-#endif // QT_NO_SHORTCUT
+#endif  // QT_NO_SHORTCUT
         actionToolbar->setText(QApplication::translate("NoteBook", "Toolbar", nullptr));
 #ifndef QT_NO_SHORTCUT
         actionToolbar->setShortcut(QApplication::translate("NoteBook", "Ctrl+M", nullptr));
-#endif // QT_NO_SHORTCUT
+#endif  // QT_NO_SHORTCUT
         actionOpzioni->setText(QApplication::translate("NoteBook", "Opzioni", nullptr));
 #ifndef QT_NO_SHORTCUT
         actionOpzioni->setShortcut(QApplication::translate("NoteBook", "Ctrl+O", nullptr));
-#endif // QT_NO_SHORTCUT
+#endif  // QT_NO_SHORTCUT
         labelUser->setText(QApplication::translate("NoteBook", "CURRENT USER", nullptr));
         label->setText(QApplication::translate("NoteBook", "Caratteri: 0", nullptr));
         label_2->setText(QApplication::translate("NoteBook", "Parole: 0", nullptr));
         label_3->setText(QApplication::translate("NoteBook", "Linee: 0", nullptr));
-    } // retranslateUi
-
+    }  // retranslateUi
 };
 
 namespace Ui {
     class NoteBook: public Ui_NoteBook {};
-} // namespace Ui
+}  // namespace Ui
 
 QT_END_NAMESPACE
 
-#endif // UI_NOTEBOOK_H
+#endif  // HEADERS_UI_NOTEBOOK_H_

@@ -1,5 +1,5 @@
-#ifndef EDITORWINDOW_H
-#define EDITORWINDOW_H
+#ifndef HEADERS_NOTEBOOK_H_
+#define HEADERS_NOTEBOOK_H_
 
 #include <QMainWindow>
 #include <QTextCursor>
@@ -15,17 +15,17 @@ class QEvent;
 namespace Ui {class NoteBook;}
 
 struct OperationNotSupported : public std::exception {
-    const char * what () const noexcept override {
+    const char * what() const noexcept override {
         return "Operation not supported";
     }
 };
-typedef std::map<std::string, std::pair<std::string,bool>> myCollabColorsMap;
+typedef std::map<std::string, std::pair<std::string, bool>> myCollabColorsMap;
 
 class NoteBook : public QMainWindow {
     Q_OBJECT
 
-public:
-    NoteBook(myClient* client, QWidget *parent = nullptr);
+ public:
+    explicit NoteBook(myClient* client, QWidget *parent = nullptr);
     ~NoteBook();
 
 private slots:
@@ -35,7 +35,7 @@ private slots:
     void CloseDocumentRequest();
     void goodbyeClient();
 
-signals:
+ signals:
     void closeEditor();
 
 public slots:
@@ -43,7 +43,7 @@ public slots:
     void eraseSymbols(int startIndex, int endIndex);
     void showSymbolsAt(int startIndex, std::vector<symbol> symbols);
 
-private:
+ private:
     Ui::NoteBook *ui;
     myClient *_client;
     void setupTextEdit();
@@ -52,4 +52,4 @@ private:
     void cursorChangeRequest(int pos);
     void removeCharRequest(const std::vector<sId>& symbolsId);
 };
-#endif // EDITORWINDOW_H
+#endif  // HEADERS_NOTEBOOK_H_
