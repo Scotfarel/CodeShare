@@ -1,1 +1,0 @@
-/usr/bin/c++  -g   CMakeFiles/tests.cpp.dir/src/RoomTextManager.cpp.o CMakeFiles/tests.cpp.dir/src/ClientTextManager.cpp.o CMakeFiles/tests.cpp.dir/src/TextManager.cpp.o CMakeFiles/tests.cpp.dir/src/Diff.cpp.o CMakeFiles/tests.cpp.dir/src/main.cpp.o  -o tests.cpp 

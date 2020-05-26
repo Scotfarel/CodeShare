@@ -1,4 +1,0 @@
-/home/naysudes/CodeShare/CMakeFiles/rebuild_cache.dir
-/home/naysudes/CodeShare/CMakeFiles/Client.dir
-/home/naysudes/CodeShare/CMakeFiles/edit_cache.dir
-/home/naysudes/CodeShare/CMakeFiles/Client_autogen.dir

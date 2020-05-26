@@ -1,1 +1,0 @@
-/usr/bin/c++  -g   CMakeFiles/tests.dir/tests.cpp.o  -o tests  /usr/lib/x86_64-linux-gnu/libgtest.so /usr/lib/x86_64-linux-gnu/libgtest_main.so /usr/lib/x86_64-linux-gnu/libgmock.so /usr/lib/x86_64-linux-gnu/libgmock_main.so -lpthread 

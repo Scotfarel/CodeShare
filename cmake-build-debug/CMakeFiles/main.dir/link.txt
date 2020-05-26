@@ -1,1 +1,0 @@
-/usr/bin/c++  -g   CMakeFiles/main.dir/src/RoomTextManager.cpp.o CMakeFiles/main.dir/src/ClientTextManager.cpp.o CMakeFiles/main.dir/src/TextManager.cpp.o CMakeFiles/main.dir/src/Traits.cpp.o CMakeFiles/main.dir/src/main.cpp.o  -o main 
