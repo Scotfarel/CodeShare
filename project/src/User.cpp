@@ -11,12 +11,11 @@ int User::getId() const {
     return id;
 }
 
-int User::cmpPosX(std::vector<int> symPos, std::pair<int,int> symId, std::vector<int> newSymPos,
-                  std::pair<int,int> newSymId, int pos) {
+int User::cmpPosX(std::vector<int> symPos, std::pair<int, int> symId, std::vector<int> newSymPos,
+                  std::pair<int, int> newSymId, int pos) {
     if (symPos.at(pos) < newSymPos.at(pos)) {
         return 1;
-    }
-    else if (symPos.at(pos) == newSymPos.at(pos)) {
+    } else if (symPos.at(pos) == newSymPos.at(pos)) {
         if (newSymPos.size() > pos + 1 && symPos.size() <= pos + 1) {
             return 1;
         } else if (newSymPos.size() <= pos + 1 && symPos.size() > pos + 1) {
@@ -31,12 +30,11 @@ int User::cmpPosX(std::vector<int> symPos, std::pair<int,int> symId, std::vector
     }
 }
 
-int User::cmpPos(std::vector<int> symPos, std::pair<int,int> symId, std::vector<int> newSymPos,
-                 std::pair<int,int> newSymId, int pos) {
-    if(symPos.at(pos) > newSymPos.at(pos)) {
+int User::cmpPos(std::vector<int> symPos, std::pair<int, int> symId, std::vector<int> newSymPos,
+                 std::pair<int, int> newSymId, int pos) {
+    if (symPos.at(pos) > newSymPos.at(pos)) {
         return 1;
-    }
-    else if (symPos.at(pos) == newSymPos.at(pos)) {
+    } else if (symPos.at(pos) == newSymPos.at(pos)) {
         if (newSymPos.size() > pos + 1 && symPos.size() <= pos + 1) {
             return -1;
         } else if (newSymPos.size() <= pos + 1 && symPos.size() > pos + 1) {
@@ -44,14 +42,14 @@ int User::cmpPos(std::vector<int> symPos, std::pair<int,int> symId, std::vector<
         } else if (newSymPos.size() > pos + 1 && symPos.size() > pos + 1) {
             return cmpPos(symPos, symId, newSymPos, newSymId, pos + 1);
         } else {
-        return newSymId.first < symId.first ? 1 : -1;
+            return newSymId.first < symId.first ? 1 : -1;
         }
     } else {
         return -1;
     }
 }
 
-int User::process(int type, int indexEditor, const std::vector<Symbol>& roomSymbols, const Symbol& newSymbol) {
+int User::process(int type, int indexEditor, const std::vector<Symbol> &roomSymbols, const Symbol &newSymbol) {
     if (type == 0) {
         int symbols_index = 0, pos_index = 0;
         int startIndex = roomSymbols.size();
@@ -60,25 +58,22 @@ int User::process(int type, int indexEditor, const std::vector<Symbol>& roomSymb
             std::cout << std::endl << "RIGHT TO LEFT: " << startIndex << std::endl << std::endl;
             for (auto s = roomSymbols.crbegin(); s != roomSymbols.crend(); s++) {
                 startIndex--;
-                int retValue = cmpPosX(s->getPos(), s->getId(), newSymbol.getPos(), newSymbol.getId(), pos_index);
-
-                if (retValue == -1)
+                int res = cmpPosX(s->getPos(), s->getId(), newSymbol.getPos(), newSymbol.getId(), pos_index);
+                if (res == -1)
                     continue;
-                else if (retValue == 1) {
-                    startIndex ++;
+                else if (res == 1) {
+                    startIndex++;
                     break;
                 }
             }
-        }
-        else {
+        } else {
             std::cout << std::endl << "LEFT TO RIGHT: " << startIndex << std::endl << std::endl;
             for (const auto &s: roomSymbols) {
                 symbols_index++;
-                int retValue = cmpPos(s.getPos(), s.getId(), newSymbol.getPos(), newSymbol.getId(), pos_index);
-
-                if (retValue == -1)
+                int res = cmpPos(s.getPos(), s.getId(), newSymbol.getPos(), newSymbol.getId(), pos_index);
+                if (res == -1)
                     continue;
-                else if (retValue == 1) {
+                else if (res == 1) {
                     startIndex = symbols_index - 1;
                     break;
                 }
@@ -88,33 +83,32 @@ int User::process(int type, int indexEditor, const std::vector<Symbol>& roomSymb
     }
 }
 
-int User::process(int type, int indexEditor, const std::vector<Symbol>& roomSymbols,
-        const std::vector<Symbol>& newSymbols) {
-    if(type == 6) {
+int User::process(int type, int indexEditor, const std::vector<Symbol> &roomSymbols,
+                  const std::vector<Symbol> &newSymbols) {
+    if (type == 6) {
         int symbols_index = 0, pos_index = 0;
         int startIndex = roomSymbols.size();
 
-        if(indexEditor > roomSymbols.size() / 2) {
+        if (indexEditor > roomSymbols.size() / 2) {
             for (auto s = roomSymbols.crbegin(); s != roomSymbols.crend(); s++) {
                 startIndex--;
-                int retValue = cmpPosX(s->getPos(), s->getId(), newSymbols.at(0).getPos(),
-                                       newSymbols.at(0).getId(), pos_index);
-                if (retValue == -1)
+                int res = cmpPosX(s->getPos(), s->getId(), newSymbols.at(0).getPos(),
+                                  newSymbols.at(0).getId(), pos_index);
+                if (res == -1)
                     continue;
-                else if (retValue == 1) {
-                    startIndex ++;
+                else if (res == 1) {
+                    startIndex++;
                     break;
                 }
             }
-        }
-        else {
+        } else {
             for (const auto &s: roomSymbols) {
                 symbols_index++;
-                int retValue = cmpPos(s.getPos(), s.getId(), newSymbols.at(0).getPos(),
-                                      newSymbols.at(0).getId(), pos_index);
-                if (retValue == -1)
+                int res = cmpPos(s.getPos(), s.getId(), newSymbols.at(0).getPos(),
+                                 newSymbols.at(0).getId(), pos_index);
+                if (res == -1)
                     continue;
-                else if (retValue == 1) {
+                else if (res == 1) {
                     startIndex = symbols_index - 1;
                     break;
                 }
@@ -124,8 +118,8 @@ int User::process(int type, int indexEditor, const std::vector<Symbol>& roomSymb
     }
 }
 
-int User::getIndexById(const std::vector<Symbol>& roomSymbols, sId id) {
-    auto it = std::find_if(roomSymbols.begin(), roomSymbols.end(), [id](const Symbol& s) {return s.getId() == id;});
+int User::getIndexById(const std::vector<Symbol> &roomSymbols, sId id) {
+    auto it = std::find_if(roomSymbols.begin(), roomSymbols.end(), [id](const Symbol &s) { return s.getId() == id; });
     if (it != roomSymbols.end()) {
         int index = it - roomSymbols.begin();
         return index;
@@ -147,7 +141,7 @@ std::string User::getUsername() {
 
 std::string User::to_string() {
     std::string my_string;
-    for(const auto& s: symbols)
+    for (const auto &s: symbols)
         my_string.push_back(s.getLetter());
     return my_string;
 }

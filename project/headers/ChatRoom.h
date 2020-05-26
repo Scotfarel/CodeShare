@@ -27,80 +27,36 @@ class ChatRoom {
 public:
     ChatRoom()= default;
     ChatRoom(MockMongoConnector* dbConnector) : conn(dbConnector) {};
-    std::string getText(MockTextBuilder* manager);
 
-    static ChatRoom& getInstance() {
-        static ChatRoom instance;
-        return instance;
-    }
     ChatRoom(ChatRoom const&) = delete;
     void operator=(ChatRoom const&) = delete;
+    static ChatRoom& getInstance();
 
-    void join(const users_ptr& participant) {
-        users.insert(participant);
-        std::cout << "participant #" << participant->getId() << " joined the room" << std::endl;
-    }
-    void leave(const users_ptr& participant) {
-        users.erase(participant);
-        std::cout << "participant leaved the room" << std::endl;
-    }
-    void deliver(const MsgContext& msg) {
-        recent_msgs.push_back(msg);
-        while (recent_msgs.size() > max_recent_msgs)
-            recent_msgs.pop_front();
 
-        for (const auto& p: users)
-            p->deliver(msg);
-    }
+    std::string getText(MockTextBuilder* manager);
 
-    void deliverToAll(const MsgContext& msg, const int& edId, const std::string& curFile, bool includeThisEditor=false) {
-        recent_msgs.push_back(msg);
-        while (recent_msgs.size() > max_recent_msgs)
-            recent_msgs.pop_front();
+    void join(const users_ptr& participant);
+    void leave(const users_ptr& participant);
+    void deliver(const MsgContext& msg);
+    void deliverToAll(const MsgContext& msg, const int& edId, const std::string& curFile, bool includeThisEditor=false);
 
-        if(!includeThisEditor) {
-            for (const auto& p: users) {
-                if (p->getId() != edId && p->getCurrentFile() == curFile) //don't send the message to the same client and don't send to clients having other file opened
-                    p->deliver(msg);
-            }
-        } else {
-            for (const auto& p: users) {
-                if (p->getCurrentFile() == curFile) { //don't send the message to the clients having other file opened
-                    p->deliver(msg);
-                }
-            }
-        }
-    }
-
-    std::map<std::string, std::vector<Symbol>> getMap() {
-        return this->room_map;
-    };
-
-    void updateMap(const std::string& key, const std::vector<Symbol>& symbols) {
-        this->room_map[key] = symbols;
-    }
-
+    std::map<std::string, std::vector<Symbol>> getMap() { return this->room_map; };
+    void updateMap(const std::string& key, const std::vector<Symbol>& symbols) { this->room_map[key] = symbols; };
     void insertInSymbolMap(const std::string &key, int index, const Symbol& s) {
         this->room_map[key].insert(this->room_map[key].begin() + index, s);
     }
-
     void eraseInSymbolMap(const std::string &key, int index) {
         this->room_map[key].erase(this->room_map[key].begin() + index);
     }
-
     void updateSymbolsMap(const std::string &key, int index, const std::vector<Symbol>& symbols) {
         this->room_map[key].insert(this->room_map[key].begin() + index, symbols.begin(), symbols.end());
     }
-
     void setMap(const std::map<std::string, std::vector<Symbol>>& m) {
         this->room_map = m;
     }
 
-    // There will be more methods for using a DB.
-    // Now we don't have enough representations.
     std::string addUser();
 
-    int id = 0;
 private:
     std::set<users_ptr> users;
     enum { max_recent_msgs = 100 };
@@ -108,7 +64,6 @@ private:
     std::map<std::string, std::vector<Symbol>> room_map;
 
     MockMongoConnector* conn;
-    bool createDbTask() { return true; };
 };
 
 template<class MockTextBuilder, class MockMongoConnector>
@@ -126,5 +81,52 @@ std::string ChatRoom<MockTextBuilder, MockMongoConnector>::getText(MockTextBuild
     return "";
 }
 
+template<class MockTextBuilder, class MockMongoConnector>
+ChatRoom<MockTextBuilder, MockMongoConnector> &ChatRoom<MockTextBuilder, MockMongoConnector>::getInstance() {
+    static ChatRoom instance;
+    return instance;
+}
+
+template<class MockTextBuilder, class MockMongoConnector>
+void ChatRoom<MockTextBuilder, MockMongoConnector>::join(const users_ptr &participant) {
+    users.insert(participant);
+    std::cout << "participant #" << participant->getId() << " joined the room" << std::endl;
+}
+
+template<class MockTextBuilder, class MockMongoConnector>
+void ChatRoom<MockTextBuilder, MockMongoConnector>::leave(const users_ptr &participant) {
+    users.erase(participant);
+    std::cout << "participant leaved the room" << std::endl;
+}
+
+template<class MockTextBuilder, class MockMongoConnector>
+void ChatRoom<MockTextBuilder, MockMongoConnector>::deliver(const MsgContext &msg) {
+    recent_msgs.push_back(msg);
+    while (recent_msgs.size() > max_recent_msgs)
+        recent_msgs.pop_front();
+    for (const auto& u: users)
+        u->deliver(msg);
+}
+
+template<class MockTextBuilder, class MockMongoConnector>
+void ChatRoom<MockTextBuilder, MockMongoConnector>::deliverToAll(const MsgContext &msg, const int &edId,
+                                                                 const std::string &curFile, bool includeThisEditor) {
+    recent_msgs.push_back(msg);
+    while (recent_msgs.size() > max_recent_msgs)
+        recent_msgs.pop_front();
+
+    if(!includeThisEditor) {
+        for (const auto& u: users) {
+            if (u->getId() != edId && u->getCurrentFile() == curFile)
+                u->deliver(msg);
+        }
+    } else {
+        for (const auto& u: users) {
+            if (u->getCurrentFile() == curFile) {
+                u->deliver(msg);
+            }
+        }
+    }
+}
 
 #endif //CODESHARE_CHATROOM_H
