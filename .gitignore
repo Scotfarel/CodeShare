@@ -7,7 +7,7 @@ TextEditor
 TextEditor.cbp
 /TextEditor_autogen
 CMakeCache.txt
-
+.idea
 !core/
 *.*#
 *.a

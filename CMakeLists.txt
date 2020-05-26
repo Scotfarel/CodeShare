@@ -45,9 +45,9 @@ list(APPEND LIBRARIES
 
 list(REMOVE_DUPLICATES LIBRARIES)
 
-add_executable(TextEditor ${SOURCES} ${Boost_INCLUDE_DIRS})
+add_executable(Client ${SOURCES} ${Boost_INCLUDE_DIRS})
 find_package(Boost 1.57.0 COMPONENTS system filesystem REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
-target_link_libraries(TextEditor ${Boost_LIBRARIES})
-target_link_libraries(TextEditor ${LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries(Client ${Boost_LIBRARIES})
+target_link_libraries(Client ${LIBRARIES} ${Boost_LIBRARIES})
 
