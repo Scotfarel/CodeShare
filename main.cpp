@@ -1,5 +1,5 @@
-#include "editorwindow.h"
-#include "myClient.h"
+#include "headers/NoteBook.h"
+#include "headers/myClient.h"
 #include <QApplication>
 
 int main(int argc, char *argv[]){
@@ -14,7 +14,7 @@ int main(int argc, char *argv[]){
 
 
     myClient* client = new myClient();
-    EditorWindow w = EditorWindow(client);
+    NoteBook w = NoteBook(client);
     w.show();
 
     return app.exec();
