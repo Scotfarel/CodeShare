@@ -20,7 +20,7 @@ set(SOURCES main.cpp
         headers/myClient.h
         src/symbol.cpp
         headers/symbol.h
-        headers/json.hpp
+        json.hpp
         src/CRDT.cpp
         headers/CRDT.h
         )

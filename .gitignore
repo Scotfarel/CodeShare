@@ -4,7 +4,8 @@
 cmake_install.cmake
 /CMakeFiles
 *.cbp
-/TextEditor_autogen
+Client
+/Client_autogen
 CMakeCache.txt
 .idea
 !core/
@@ -286,4 +287,4 @@ tmp/
 /*-release/
 
 # Ignore external library
-headers/json.hpp
+json.hpp
