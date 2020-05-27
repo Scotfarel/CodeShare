@@ -1,4 +1,4 @@
-#include "headers/MyQTextEdit.h"
+#include "headers/TextEditor.h"
 #include <QMimeData>
 #include <qdebug.h>
 #include <QContextMenuEvent>
@@ -9,7 +9,7 @@
 #include <QRegularExpression>
 #include <QPainter>
 
-void MyQTextEdit::insertFromMimeData(const QMimeData* source) {
+void TextEditor::insertFromMimeData(const QMimeData* source) {
     if (source->hasText() && !source->hasImage() && !source->hasUrls() && !source->html().contains("<a href")) {
         QString text = source->text();
         QTextCursor cursor = textCursor();
@@ -31,7 +31,7 @@ void MyQTextEdit::insertFromMimeData(const QMimeData* source) {
     }
 }
 
-void MyQTextEdit::paintEvent(QPaintEvent *event) {
+void TextEditor::paintEvent(QPaintEvent *event) {
     QTextEdit::paintEvent(event);
     QPainter painter(viewport());
     painter.setRenderHint(QPainter::Antialiasing, true);
@@ -95,7 +95,7 @@ void MyQTextEdit::paintEvent(QPaintEvent *event) {
     }
 }
 
-int MyQTextEdit::calculateWidthForUsername(QString& username) {
+int TextEditor::calculateWidthForUsername(QString& username) {
     int startWidth = username.contains('w', Qt::CaseInsensitive) ? 95 : 80;
     int length = username.length();
     int finalVal = (length*startWidth)/8;
@@ -109,7 +109,7 @@ int MyQTextEdit::calculateWidthForUsername(QString& username) {
     return finalVal;
 }
 
-int MyQTextEdit::calculateOffsetY(int curFontSize) {
+int TextEditor::calculateOffsetY(int curFontSize) {
     int retVal = 0;
     if (curFontSize > 0 && curFontSize <= 96)
         retVal = 0;
@@ -128,7 +128,7 @@ int MyQTextEdit::calculateOffsetY(int curFontSize) {
     return retVal;
 }
 
-int MyQTextEdit::calculateOffsetHeight(int curFontSize) {
+int TextEditor::calculateOffsetHeight(int curFontSize) {
     int retVal;
     int base = (curFontSize*3)/14;
     if (curFontSize > 0 && curFontSize <= 30)
@@ -164,18 +164,18 @@ int MyQTextEdit::calculateOffsetHeight(int curFontSize) {
     return retVal;
 }
 
-void MyQTextEdit::addRemoteCursor(QString username, std::pair<QString, int> colorAndPos) {
+void TextEditor::addRemoteCursor(QString username, std::pair<QString, int> colorAndPos) {
     this->remoteCursors.insert(username, std::make_pair(colorAndPos.first, colorAndPos.second));
 }
 
 
 
-void MyQTextEdit::removeRemoteCursor(std::string username) {
+void TextEditor::removeRemoteCursor(std::string username) {
     remoteCursors.remove(QString::fromStdString(username));
     this->viewport()->update();
 }
 
-void MyQTextEdit::changeRemoteCursor(std::string username, std::string color, int pos) {
+void TextEditor::changeRemoteCursor(std::string username, std::string color, int pos) {
     QString col = QString::fromStdString(color);
     col[1] = 'f';
     col[2] = 'f';
@@ -186,7 +186,7 @@ void MyQTextEdit::changeRemoteCursor(std::string username, std::string color, in
     this->viewport()->update();
 }
 
-void MyQTextEdit::hideHorizontalRect() {
+void TextEditor::hideHorizontalRect() {
     showHorizontalRect = false;
     this->viewport()->update();
 }

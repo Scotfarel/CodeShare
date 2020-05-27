@@ -1,59 +1,59 @@
 #include <cstring>
-#include "headers/message.h"
+#include "headers/Message.h"
 
-message::message() : body_length_(0) {}
+Message::Message() : body_length_(0) {}
 
-const char *message::data() const {
+const char *Message::data() const {
     return data_;
 }
 
-char *message::data() {
+char *Message::data() {
     return data_;
 }
 
-std::size_t message::length() const {
+std::size_t Message::length() const {
     return header_length + body_length_;
 }
 
-const char *message::body() const {
+const char *Message::body() const {
     return data_ + header_length;
 }
 
-char *message::body() {
+char *Message::body() {
     return data_ + header_length;
 }
 
-std::size_t message::body_length() const {
+std::size_t Message::body_length() const {
     return body_length_;
 }
 
-void message::body_length(std::size_t new_length) {
+void Message::body_length(std::size_t new_length) {
     body_length_ = new_length;
 }
 
-char &message::isThisLastChunk() {
+char &Message::isThisLastChunk() {
     return isLastChunk;
 }
 
-void message::setLastChunk(char val) {
+void Message::setLastChunk(char val) {
     this->isLastChunk = val;
 }
 
-void message::decode_header() {
+void Message::decode_header() {
     char header[header_length + 2] = "";
     std::strncat(header, data_ + 1, header_length);
     body_length_ = std::atoi(header);
     this->setLastChunk(*data_);
 }
 
-void message::encode_header() {
+void Message::encode_header() {
     char header[header_length + 1] = "";
     std::snprintf(header, 6, "%5d", static_cast<int>(body_length_));
     std::memcpy(data_ + 1, header, header_length);
 }
 
-message message::constructMsg(const std::string &chunkRequest, char isLastChunk) {
-    message msg;
+Message Message::constructMsg(const std::string &chunkRequest, char isLastChunk) {
+    Message msg;
     msg.setLastChunk(isLastChunk);
     msg.body_length(chunkRequest.size());
     std::memcpy(msg.body() + 1, chunkRequest.data(), msg.body_length());

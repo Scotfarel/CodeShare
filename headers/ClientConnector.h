@@ -7,9 +7,9 @@
 #include <QTimer>
 #include <thread>
 #include <memory>
-#include "headers/message.h"
+#include "headers/Message.h"
 #include <deque>
-#include "headers/jsonUtility.h"
+#include "headers/jsonTypes.h"
 #include "headers/symbol.h"
 #include "headers/File.h"
 #include <QDebug>
@@ -17,15 +17,15 @@
 #include "headers/CRDT.h"
 
 using boost::asio::ip::tcp;
-typedef std::deque<message> message_queue;
+typedef std::deque<Message> message_queue;
 typedef std::pair<int, int> sId;
 
-class myClient : public QObject {
+class ClientConnector : public QObject {
     Q_OBJECT
 
  public:
-    myClient();
-    virtual ~myClient();
+    ClientConnector();
+    virtual ~ClientConnector();
     CRDT Crdt;
     void do_connect();
     bool getStatus();
@@ -33,7 +33,7 @@ class myClient : public QObject {
     QString getFileURI();
     void setFileURI(QString uri);
     void close();
-    void write(const message& msg);
+    void write(const Message& msg);
     void sendRequestMsg(std::string request);
 
  signals:
@@ -59,7 +59,7 @@ class myClient : public QObject {
     tcp::resolver resolver_;
     tcp::socket socket_;
     std::string fullBody;
-    message read_msg_;
+    Message read_msg_;
     message_queue write_msgs_;
     void do_read_header();
     void do_read_body();

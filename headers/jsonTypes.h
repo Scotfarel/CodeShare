@@ -1,5 +1,5 @@
-#ifndef  HEADERS_JSONUTILITY_H_
-#define  HEADERS_JSONUTILITY_H_
+#ifndef  HEADERS_JSONTYPES_H_
+#define  HEADERS_JSONTYPES_H_
 #include <iostream>
 #include "json.hpp"
 #include "headers/symbol.h"
@@ -8,7 +8,7 @@
 using nlohmann::json;
 typedef std::pair<int, int> sId;
 
-class jsonUtility {
+class jsonTypes {
 // SERIALIZATION (convert json into string) -> it is obtained with method dump() (e.g. json.dump())
  public:
     static void to_json(json &j, const std::string &op, const std::string &resp);
@@ -36,4 +36,4 @@ class jsonUtility {
     static void from_json_removal_range(const json& j, std::vector<sId>& symbolsId);
     static std::vector<json> fromFormattingSymToJson(const std::vector<symbol>& symbols);
 };
-#endif  //  HEADERS_JSONUTILITY_H_
+#endif  //  HEADERS_JSONTYPES_H_

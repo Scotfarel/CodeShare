@@ -3,10 +3,10 @@
 #include <QTextEdit>
 #include <QTimer>
 
-class MyQTextEdit : public QTextEdit {
+class TextEditor : public QTextEdit {
     Q_OBJECT
  public:
-    explicit MyQTextEdit(QWidget* parent) : QTextEdit(parent) {}
+    explicit TextEditor(QWidget* parent) : QTextEdit(parent) {}
     void insertFromMimeData(const QMimeData * source) override;
     void addRemoteCursor(QString username, std::pair<QString, int> colorAndPos);
     QTimer timer;

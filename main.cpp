@@ -1,5 +1,5 @@
 #include "headers/NoteBook.h"
-#include "headers/myClient.h"
+#include "headers/ClientConnector.h"
 #include <QApplication>
 
 int main(int argc, char *argv[]){
@@ -13,7 +13,7 @@ int main(int argc, char *argv[]){
     QApplication app(argc, argv);
 
 
-    myClient* client = new myClient();
+    ClientConnector* client = new ClientConnector();
     NoteBook w = NoteBook(client);
     w.show();
 

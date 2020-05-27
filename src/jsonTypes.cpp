@@ -1,13 +1,13 @@
-#include "headers/jsonUtility.h"
+#include "headers/jsonTypes.h"
 
-void jsonUtility::to_json(json &j, const std::string &op, const std::string &resp) {
+void jsonTypes::to_json(json &j, const std::string &op, const std::string &resp) {
     j = json{
             {"operation", op},
             {"content", {{"response", resp}}}
     };
 }
 
-void jsonUtility::to_json(json &j, const std::string &op, const std::string &user, const std::string &pass) {
+void jsonTypes::to_json(json &j, const std::string &op, const std::string &user, const std::string &pass) {
     j = json{
             {"operation", op},
             {"content", {{"username", user},
@@ -15,7 +15,7 @@ void jsonUtility::to_json(json &j, const std::string &op, const std::string &use
     };
 }
 
-void jsonUtility::to_json_insertion(json &j, const std::string &op, const symbol &symbol, const int &indexInEditor) {
+void jsonTypes::to_json_insertion(json &j, const std::string &op, const symbol &symbol, const int &indexInEditor) {
     j = json{
             {"operation", op},
             {"id", symbol.getId()},
@@ -25,7 +25,7 @@ void jsonUtility::to_json_insertion(json &j, const std::string &op, const symbol
     };
 }
 
-void jsonUtility::to_json_FormattingSymbol(json &j, const symbol &symbol) {
+void jsonTypes::to_json_FormattingSymbol(json &j, const symbol &symbol) {
     j = json{
             {"id", symbol.getId()},
             {"pos", symbol.getPos()},
@@ -33,14 +33,14 @@ void jsonUtility::to_json_FormattingSymbol(json &j, const symbol &symbol) {
     };
 }
 
-void jsonUtility::to_json_cursor_change_req(json &j, const std::string &op, const int &index) {
+void jsonTypes::to_json_cursor_change_req(json &j, const std::string &op, const int &index) {
     j = json {
             {"operation", op},
             {"index", index}
     };
 }
 
-void jsonUtility::to_json_removal_range(json &j, const std::string &op, const std::vector<sId> &symbolsId) {
+void jsonTypes::to_json_removal_range(json &j, const std::string &op, const std::vector<sId> &symbolsId) {
     j = json{
             {"operation", op},
             {"symbolsId", symbolsId}
@@ -48,7 +48,7 @@ void jsonUtility::to_json_removal_range(json &j, const std::string &op, const st
 }
 
 
-void jsonUtility::to_jsonUri(json &j, const std::string &op, const std::string &user, const std::string &uri) {
+void jsonTypes::to_jsonUri(json &j, const std::string &op, const std::string &user, const std::string &uri) {
     j = json{
             {"operation", op},
             {"content", {{"username", user},
@@ -56,7 +56,7 @@ void jsonUtility::to_jsonUri(json &j, const std::string &op, const std::string &
     };
 }
 
-void jsonUtility::to_json(json &j, const std::string &op, const std::string &user, const std::string &pass, const std::string &email) {
+void jsonTypes::to_json(json &j, const std::string &op, const std::string &user, const std::string &pass, const std::string &email) {
     j = json{
             {"operation", op},
             {"content", {{"username", user},
@@ -65,7 +65,7 @@ void jsonUtility::to_json(json &j, const std::string &op, const std::string &use
     };
 }
 
-void jsonUtility::to_json_insertion_range(json &j, const std::string &op, const std::vector<json> &symVector, const int &startIndex) {
+void jsonTypes::to_json_insertion_range(json &j, const std::string &op, const std::vector<json> &symVector, const int &startIndex) {
     j = json{
             {"operation", op},
             {"formattingSymVector", symVector},  // JSON vector
@@ -73,11 +73,11 @@ void jsonUtility::to_json_insertion_range(json &j, const std::string &op, const 
     };
 }
 
-void jsonUtility::from_json(const json &j, std::string &op) {
+void jsonTypes::from_json(const json &j, std::string &op) {
     op = j.at("operation").get<std::string>();
 }
 
-void jsonUtility::from_json_resp(const json &j, std::string &resp) {
+void jsonTypes::from_json_resp(const json &j, std::string &resp) {
     resp = j.at("content").at("response").get<std::string>();
 }
 
@@ -89,7 +89,7 @@ void from_json(const json& j, symbol& s) {
     s = symbol(letter, id, pos);
 }
 
-void jsonUtility::from_json_insertion(const json& j, symbol& s, int &indexInEditor) {
+void jsonTypes::from_json_insertion(const json& j, symbol& s, int &indexInEditor) {
     indexInEditor = j.at("indexInEditor").get<int>();
     auto letter = j.at("letter").get<wchar_t>();
     auto id = j.at("id").get<std::pair<int, int>>();
@@ -97,16 +97,16 @@ void jsonUtility::from_json_insertion(const json& j, symbol& s, int &indexInEdit
     s = symbol(letter, id, pos);
 }
 
-void jsonUtility::from_json_symbols(const json &j, std::vector<symbol>& symbols) {
+void jsonTypes::from_json_symbols(const json &j, std::vector<symbol>& symbols) {
     symbols = j.at("content").at("symVector").get<std::vector<symbol>>();  // use from_json previously defined
 }
 
-void jsonUtility::from_json_insertion_range(const json &j, int& firstIndex, std::vector<json>& jsonSymbols) {
+void jsonTypes::from_json_insertion_range(const json &j, int& firstIndex, std::vector<json>& jsonSymbols) {
     firstIndex = j.at("firstIndexRange").get<int>();
     jsonSymbols = j.at("symbols").get<std::vector<json>>();
 }
 
-symbol* jsonUtility::from_json_symbol(const json &j) {
+symbol* jsonTypes::from_json_symbol(const json &j) {
     wchar_t letter;
     std::pair<int, int> id;
     std::vector<int> pos;
@@ -126,44 +126,44 @@ symbol* jsonUtility::from_json_symbol(const json &j) {
 }
 
 
-void jsonUtility::from_json(const json &j, std::string &user, std::string &pass) {
+void jsonTypes::from_json(const json &j, std::string &user, std::string &pass) {
     user = j.at("content").at("username").get<std::string>();
     pass = j.at("content").at("password").get<std::string>();
 }
 
-void jsonUtility::from_json(const json &j, std::string &user, std::string &pass, std::string &email) {
+void jsonTypes::from_json(const json &j, std::string &user, std::string &pass, std::string &email) {
     user = j.at("content").at("username").get<std::string>();
     pass = j.at("content").at("password").get<std::string>();
     email = j.at("content").at("email").get<std::string>();
 }
 
-void jsonUtility::from_jsonUri(const json &j, std::string &uri) {
+void jsonTypes::from_jsonUri(const json &j, std::string &uri) {
     uri = j.at("content").at("uri").get<std::string>();
 }
 
-void jsonUtility::from_json_removal(const json &j, int& index) {
+void jsonTypes::from_json_removal(const json &j, int& index) {
     index = j.at("index").get<int>();
 }
 
-void jsonUtility::from_json_cursor_change(const json &j, std::string& username, std::string& color, int& pos) {
+void jsonTypes::from_json_cursor_change(const json &j, std::string& username, std::string& color, int& pos) {
     username = j.at("username").get<std::string>();
     color = j.at("color").get<std::string>();
     pos = j.at("pos").get<int>();
 }
 
-void jsonUtility::from_json_removal_range(const json &j, std::vector<sId>& symbolsId) {
+void jsonTypes::from_json_removal_range(const json &j, std::vector<sId>& symbolsId) {
     symbolsId = j.at("symbolsId").get<std::vector<sId>>();
 }
 
 
-std::vector<json> jsonUtility::fromFormattingSymToJson(const std::vector<symbol>& symbols) {
+std::vector<json> jsonTypes::fromFormattingSymToJson(const std::vector<symbol>& symbols) {
     if (symbols.empty())
         return json::array();
 
     std::vector<json> jsons;
     for (auto const &sym : symbols) {
         json j;
-        jsonUtility::to_json_FormattingSymbol(j, sym);
+        jsonTypes::to_json_FormattingSymbol(j, sym);
         jsons.push_back(j);
     }
     return jsons;

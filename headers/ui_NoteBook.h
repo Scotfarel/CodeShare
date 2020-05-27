@@ -1,5 +1,5 @@
 /********************************************************************************
-** Form generated from reading UI file 'NoteBook.ui'
+** Form generated from reading UI file 'NoteBook.UI'
 **
 ** Created by: Qt User Interface Compiler version 5.12.4
 **
@@ -20,7 +20,7 @@
 #include <QtWidgets/QSpacerItem>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
-#include <headers/MyQTextEdit.h>
+#include <headers/TextEditor.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -51,7 +51,7 @@ class Ui_NoteBook {
     QHBoxLayout *horizontalLayout_5;
     QHBoxLayout *horizontalLayout_10;
     QVBoxLayout *verticalLayout_5;
-    MyQTextEdit *RealTextEdit;
+    TextEditor *RealTextEdit;
     QFrame *line;
     QVBoxLayout *verticalLayout_4;
     QHBoxLayout *horizontalLayout;
@@ -183,7 +183,7 @@ class Ui_NoteBook {
         verticalLayout_5->setSpacing(14);
         verticalLayout_5->setObjectName(QString::fromUtf8("verticalLayout_5"));
         verticalLayout_5->setContentsMargins(0, 5, 35, -1);
-        RealTextEdit = new MyQTextEdit(editorFrame);
+        RealTextEdit = new TextEditor(editorFrame);
         RealTextEdit->setObjectName(QString::fromUtf8("RealTextEdit"));
         QSizePolicy sizePolicy1(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
         sizePolicy1.setHorizontalStretch(0);

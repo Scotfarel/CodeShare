@@ -4,10 +4,10 @@
 #include <iostream>
 #define MAX_CHUNK_LENGTH 65000
 
-class message {
+class Message {
  public:
     enum { header_length = 5 };
-    message();
+    Message();
     const char* data() const;
     char* data();
     std::size_t length() const;
@@ -20,7 +20,7 @@ class message {
     void reset_data();
     char& isThisLastChunk();
     void setLastChunk(char val);
-    static message constructMsg(const std::string& chunkResponse, char isLastChunk);
+    static Message constructMsg(const std::string& chunkResponse, char isLastChunk);
 
  private:
     char data_[MAX_CHUNK_LENGTH + header_length + 1];

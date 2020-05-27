@@ -1810,9 +1810,9 @@ file.
 
 Exceptions have ids 1xx.
 
-name / id                      | example message | description
+name / id                      | example Message | description
 ------------------------------ | --------------- | -------------------------
-json.exception.parse_error.101 | parse error at 2: unexpected end of input; expected string literal | This error indicates a syntax error while deserializing a JSON text. The error message describes that an unexpected token (character) was encountered, and the member @a byte indicates the error position.
+json.exception.parse_error.101 | parse error at 2: unexpected end of input; expected string literal | This error indicates a syntax error while deserializing a JSON text. The error Message describes that an unexpected token (character) was encountered, and the member @a byte indicates the error position.
 json.exception.parse_error.102 | parse error at 14: missing or wrong low surrogate | JSON uses the `\uxxxx` format to describe Unicode characters. Code points above above 0xFFFF are split into two `\uxxxx` entries ("surrogate pairs"). This error indicates that the surrogate pair is incomplete or contains an invalid code point.
 json.exception.parse_error.103 | parse error: code points above 0x10FFFF are invalid | Unicode supports code points up to 0x10FFFF. Code points above 0x10FFFF are invalid.
 json.exception.parse_error.104 | parse error: JSON patch must be an array of objects | [RFC 6902](https://tools.ietf.org/html/rfc6902) requires a JSON Patch document to be a JSON document that represents an array of objects.
@@ -1899,7 +1899,7 @@ the expected semantics.
 
 Exceptions have ids 2xx.
 
-name / id                           | example message | description
+name / id                           | example Message | description
 ----------------------------------- | --------------- | -------------------------
 json.exception.invalid_iterator.201 | iterators are not compatible | The iterators passed to constructor @ref basic_json(InputIT first, InputIT last) are not compatible, meaning they do not belong to the same container. Therefore, the range (@a first, @a last) is invalid.
 json.exception.invalid_iterator.202 | iterator does not fit current value | In an erase or insert function, the passed iterator @a pos does not belong to the JSON value for which the function was called. It hence does not define a valid position for the deletion/insertion.
@@ -1951,7 +1951,7 @@ executed on a JSON value whose type does not match the expected semantics.
 
 Exceptions have ids 3xx.
 
-name / id                     | example message | description
+name / id                     | example Message | description
 ----------------------------- | --------------- | -------------------------
 json.exception.type_error.301 | cannot create object from initializer list | To create an object from an initializer list, the initializer list must consist only of a list of pairs whose first element is a string. When this constraint is violated, an array is created instead.
 json.exception.type_error.302 | type must be object, but is array | During implicit or explicit value conversion, the JSON type must be compatible to the target type. For instance, a JSON string can only be converted into string types, but not into numbers or boolean types.
@@ -2005,7 +2005,7 @@ indices or nonexisting object keys.
 
 Exceptions have ids 4xx.
 
-name / id                       | example message | description
+name / id                       | example Message | description
 ------------------------------- | --------------- | -------------------------
 json.exception.out_of_range.401 | array index 3 is out of range | The provided array index @a i is larger than @a size-1.
 json.exception.out_of_range.402 | array index '-' (3) is out of range | The special array index `-` in a JSON Pointer never describes a valid element of the array, but the index past the end. That is, it can only be used to add elements at this position, but not to read it.
@@ -2051,7 +2051,7 @@ other exception types.
 
 Exceptions have ids 5xx.
 
-name / id                      | example message | description
+name / id                      | example Message | description
 ------------------------------ | --------------- | -------------------------
 json.exception.other_error.501 | unsuccessful: {"op":"test","path":"/baz", "value":"bar"} | A JSON Patch operation 'test' failed. The unsuccessful operation is also printed.
 
@@ -6959,9 +6959,9 @@ class binary_reader
 
     /*!
     @param[in] format   the current format
-    @param[in] detail   a detailed error message
+    @param[in] detail   a detailed error Message
     @param[in] context  further contect information
-    @return a message string to use in the parse_error exceptions
+    @return a Message string to use in the parse_error exceptions
     */
     std::string exception_message(const input_format_t format,
                                   const std::string& detail,
@@ -7206,7 +7206,7 @@ class lexer
 
     Adds the current byte and, for each passed range, reads a new byte and
     checks if it is inside the range. If a violation was detected, set up an
-    error message and return false. Otherwise, return true.
+    error Message and return false. Otherwise, return true.
 
     @param[in] ranges  list of integers; interpreted as list of pairs of
                        inclusive lower and upper bound, respectively
@@ -8399,7 +8399,7 @@ scan_number_done:
         return result;
     }
 
-    /// return syntax error message
+    /// return syntax error Message
     JSON_HEDLEY_RETURNS_NON_NULL
     constexpr const char* get_error_message() const noexcept
     {
@@ -8871,7 +8871,7 @@ class parser
 
                     case token_type::parse_error:
                     {
-                        // using "uninitialized" to avoid "expected" message
+                        // using "uninitialized" to avoid "expected" Message
                         return sax->parse_error(m_lexer.get_position(),
                                                 m_lexer.get_token_string(),
                                                 parse_error::create(101, m_lexer.get_position(),
@@ -22095,7 +22095,7 @@ class basic_json
                 // find value
                 auto it = val.m_value.object->find(member);
 
-                // context-sensitive error message
+                // context-sensitive error Message
                 const auto error_msg = (op == "op") ? "operation" : "operation '" + op + "'";
 
                 // check if desired value is present

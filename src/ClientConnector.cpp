@@ -1,9 +1,9 @@
-﻿#include "headers/myClient.h"
+﻿#include "headers/ClientConnector.h"
 #include <qtextcodec.h>
 #include <QMessageBox>
 #include <QtWidgets/QApplication>
-typedef std::deque<message> message_queue;
-myClient::myClient()
+typedef std::deque<Message> message_queue;
+ClientConnector::ClientConnector()
         : work_(new boost::asio::io_context::work(io_context_)),
           resolver_(io_context_),
           socket_(io_context_),
@@ -15,13 +15,13 @@ myClient::myClient()
     do_connect();
 }
 
-myClient::~myClient() {
+ClientConnector::~ClientConnector() {
     work_.reset();
     this->close();
     worker_.join();
 }
 
-void myClient::do_connect() {
+void ClientConnector::do_connect() {
     auto endpoints = resolver_.resolve("127.0.0.1", "63506");
     boost::asio::async_connect(socket_, endpoints,
                                [this](boost::system::error_code ec, const tcp::endpoint&) {
@@ -37,10 +37,10 @@ void myClient::do_connect() {
      });
 }
 
-void myClient::do_read_header() {
+void ClientConnector::do_read_header() {
     memset(read_msg_.data(), 0, read_msg_.length() + 1);  // VERY IMPORTANT, otherwise rubbish remains inside socket!
     boost::asio::async_read(socket_,
-                            boost::asio::buffer(read_msg_.data(), message::header_length+1),
+                            boost::asio::buffer(read_msg_.data(), Message::header_length + 1),
                             [this](boost::system::error_code ec, std::size_t /*length*/) {
         if (!ec) {
             read_msg_.decode_header();
@@ -52,7 +52,7 @@ void myClient::do_read_header() {
     });
 }
 
-void myClient::do_read_body() {
+void ClientConnector::do_read_body() {
     boost::asio::async_read(socket_,
                             boost::asio::buffer(read_msg_.body()+1, read_msg_.body_length()),
                             [this](boost::system::error_code ec, std::size_t /*length*/) {
@@ -67,11 +67,11 @@ void myClient::do_read_body() {
             std::string opJSON;
             try {
                 json jdata_in = json::parse(fullBody);
-                jsonUtility::from_json(jdata_in, opJSON);
+                jsonTypes::from_json(jdata_in, opJSON);
 
                  if (opJSON == "DISCONNECT_RESPONSE") {
                     std::string db_responseJSON;
-                    jsonUtility::from_json_resp(jdata_in, db_responseJSON);
+                    jsonTypes::from_json_resp(jdata_in, db_responseJSON);
 
                     if (db_responseJSON == "LOGOUT_OK") {
                         emit opResultSuccess("DISCONNECT_SUCCESS");
@@ -80,7 +80,7 @@ void myClient::do_read_body() {
                     }
                 } else if (opJSON == "LOGOUTURI_RESPONSE") {
                     std::string db_responseJSON;
-                    jsonUtility::from_json_resp(jdata_in, db_responseJSON);
+                    jsonTypes::from_json_resp(jdata_in, db_responseJSON);
 
                     if (db_responseJSON == "LOGOUTURI_OK") {
                         emit editorResultSuccess("LOGOUTURI_SUCCESS");
@@ -89,11 +89,11 @@ void myClient::do_read_body() {
                     }
                 } else if (opJSON == "NEWFILE_RESPONSE") {
                     std::string db_responseJSON;
-                    jsonUtility::from_json_resp(jdata_in, db_responseJSON);
+                    jsonTypes::from_json_resp(jdata_in, db_responseJSON);
 
                     if (db_responseJSON == "NEWFILE_OK") {
                         std::string uriJSON;
-                        jsonUtility::from_jsonUri(jdata_in, uriJSON);  // get json value and put into JSON variables
+                        jsonTypes::from_jsonUri(jdata_in, uriJSON);  // get json value and put into JSON variables
                         QString uriQString = QString::fromUtf8(uriJSON.data(), uriJSON.size());
 
                         // Update client data
@@ -105,11 +105,11 @@ void myClient::do_read_body() {
                     }
                 } else if (opJSON == "OPENFILE_RESPONSE") {
                     std::string db_responseJSON;
-                    jsonUtility::from_json_resp(jdata_in, db_responseJSON);
+                    jsonTypes::from_json_resp(jdata_in, db_responseJSON);
 
                     if (db_responseJSON == "OPENFILE_OK") {
                         std::vector<symbol> symbolsJSON;
-                        jsonUtility::from_json_symbols(jdata_in, symbolsJSON);
+                        jsonTypes::from_json_symbols(jdata_in, symbolsJSON);
 
                         this->Crdt.setSymbols(symbolsJSON);
 
@@ -124,7 +124,7 @@ void myClient::do_read_body() {
                 }  else if (opJSON == "INSERTION_RESPONSE") {
                     symbol symbolJSON;
                     int indexEditorJSON;
-                    jsonUtility::from_json_insertion(jdata_in, symbolJSON, indexEditorJSON);
+                    jsonTypes::from_json_insertion(jdata_in, symbolJSON, indexEditorJSON);
                     int newIndex = this->Crdt.process(0, indexEditorJSON, symbolJSON);
 
                     std::pair<int, wchar_t> tuple = std::make_pair(newIndex, symbolJSON.getLetter());
@@ -132,12 +132,12 @@ void myClient::do_read_body() {
                 } else if (opJSON == "INSERTIONRANGE_RESPONSE") {
                     int firstIndexJSON;
                     std::vector<json> jsonSymbols;
-                    jsonUtility::from_json_insertion_range(jdata_in, firstIndexJSON, jsonSymbols);
+                    jsonTypes::from_json_insertion_range(jdata_in, firstIndexJSON, jsonSymbols);
                     std::vector<symbol> symbols;
                     int newIndex = firstIndexJSON;
                     for (const auto& j :  jsonSymbols) {
                         symbol *s = nullptr;  // do not remember to delete it! (keyword 'delete')
-                        s = jsonUtility::from_json_symbol(j);
+                        s = jsonTypes::from_json_symbol(j);
                         if (!s) {
                             emitMsgInCorrectWindow();  // show error
                             do_read_header();
@@ -152,11 +152,11 @@ void myClient::do_read_body() {
                     std::string usernameJSON;
                     std::string colorJSON;
                     int posJSON;
-                    jsonUtility::from_json_cursor_change(jdata_in, usernameJSON, colorJSON, posJSON);
+                    jsonTypes::from_json_cursor_change(jdata_in, usernameJSON, colorJSON, posJSON);
                     emit changeRemoteCursor(usernameJSON, colorJSON, posJSON);
                 }  else if (opJSON == "REMOVAL_RESPONSE") {
                     std::vector<sId> symbolsId;
-                    jsonUtility::from_json_removal_range(jdata_in, symbolsId);
+                    jsonTypes::from_json_removal_range(jdata_in, symbolsId);
 
                     int newIndex;
                     for (const sId& id : symbolsId) {
@@ -173,7 +173,7 @@ void myClient::do_read_body() {
                 fullBody = "";
                 do_read_header();
             } catch (json::exception& e) {
-                std::cerr << "message: " << e.what() << '\n' << "exception id: " << e.id << std::endl;
+                std::cerr << "Message: " << e.what() << '\n' << "exception id: " << e.id << std::endl;
                 emitMsgInCorrectWindow();
                 fullBody = "";
                 do_read_header();
@@ -185,11 +185,11 @@ void myClient::do_read_body() {
     });
 }
 
-void myClient::emitMsgInCorrectWindow() {
+void ClientConnector::emitMsgInCorrectWindow() {
     emit jsonMsgFailure("StartWindow", "Cant parse json");
 }
 
-void myClient::do_write() {
+void ClientConnector::do_write() {
     boost::asio::async_write(socket_,
                              boost::asio::buffer(write_msgs_.front().data(), write_msgs_.front().length()+1),
                              [this](boost::system::error_code ec, std::size_t /*length*/) {
@@ -206,17 +206,17 @@ void myClient::do_write() {
      });
 }
 
-bool myClient::getStatus() {
+bool ClientConnector::getStatus() {
     return status;
 }
 
-void myClient::closeConnection() {
+void ClientConnector::closeConnection() {
     status = false;
     emit statusChanged(status);
     socket_.close();
 }
 
-void myClient::write(const message& msg) {
+void ClientConnector::write(const Message& msg) {
     boost::asio::post(io_context_, [this, msg]() {
       bool write_in_progress = !write_msgs_.empty();
       write_msgs_.push_back(msg);
@@ -226,25 +226,25 @@ void myClient::write(const message& msg) {
   });
 }
 
-void myClient::close() {
+void ClientConnector::close() {
     boost::asio::post(io_context_, [this]() {
         closeConnection();
     });
 }
 
-QString myClient::getUsername() {
+QString ClientConnector::getUsername() {
     return this->username_;
 }
 
-void myClient::setFileURI(QString uri) {
+void ClientConnector::setFileURI(QString uri) {
     this->uri_ = uri;
 }
 
-QString myClient::getFileURI() {
+QString ClientConnector::getFileURI() {
     return this->uri_;
 }
 
-void myClient::sendRequestMsg(std::string request) {
+void ClientConnector::sendRequestMsg(std::string request) {
     int mod = (request.length() % MAX_CHUNK_LENGTH == 0) ? 1 : 0;
     int numChanks = (int)((request.length() / MAX_CHUNK_LENGTH) + 1 - mod);
     int chunkSize = MAX_CHUNK_LENGTH;
@@ -255,7 +255,7 @@ void myClient::sendRequestMsg(std::string request) {
             chunkSize = (int)(request.length() % MAX_CHUNK_LENGTH);
             isLastChunk = '1';
         }
-        message msg = message::constructMsg(std::string(chunkResponse.begin(),
+        Message msg = Message::constructMsg(std::string(chunkResponse.begin(),
                 chunkResponse.begin() + chunkSize), isLastChunk);
         chunkResponse.erase(0, chunkSize);
         this->write(msg);  // deliver msg to the server

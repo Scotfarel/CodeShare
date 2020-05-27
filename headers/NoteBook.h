@@ -5,9 +5,9 @@
 #include <QTextCursor>
 #include <QComboBox>
 #include <QMetaType>
-#include "headers/jsonUtility.h"
-#include "headers/message.h"
-#include "myClient.h"
+#include "headers/jsonTypes.h"
+#include "headers/Message.h"
+#include "ClientConnector.h"
 #include "qlistwidget.h"
 #include <QtGui>
 #include <QWidget>
@@ -25,31 +25,38 @@ class NoteBook : public QMainWindow {
     Q_OBJECT
 
  public:
-    explicit NoteBook(myClient* client, QWidget *parent = nullptr);
+    explicit NoteBook(ClientConnector* client, QWidget *parent = nullptr);
     ~NoteBook();
 
 private slots:
-    void on_RealTextEdit_textChanged();
+    void real_text_change();
     bool eventFilter(QObject *obj, QEvent *ev);
     void on_actionClose_triggered();
-    void CloseDocumentRequest();
-    void goodbyeClient();
+    void close_document_req();
+    void end_session();
 
  signals:
     void closeEditor();
 
 public slots:
-    void showSymbol(std::pair<int, wchar_t> tuple);
-    void eraseSymbols(int startIndex, int endIndex);
-    void showSymbolsAt(int startIndex, std::vector<symbol> symbols);
+    /* Отображение символа */
+    void show_sym(std::pair<int, wchar_t> tuple);
+    /* Удаление видимого символа */
+    void erase_sym(int startIndex, int endIndex);
+    /* Отображение символа на конкретной позиции */
+    void show_sym_in_pos(int startIndex, std::vector<symbol> symbols);
 
  private:
-    Ui::NoteBook *ui;
-    myClient *_client;
+    Ui::NoteBook *UI;
+    ClientConnector *_client;
+    /* Настройки QT редактора */
     void setupTextEdit();
     void setupFirstLetter();
-    void insertCharRangeRequest(int pos, bool cursorHasSelection);
-    void cursorChangeRequest(int pos);
-    void removeCharRequest(const std::vector<sId>& symbolsId);
+    /* Отправка запроса на вставку нескольких символов */
+    void insert_range_req(int pos, bool cursorHasSelection);
+    /* Отправка запроса на изменение курсора */
+    void cursor_change_req(int pos);
+    /* Отправка запроса на удаление символа */
+    void remove_req(const std::vector<sId>& symbolsId);
 };
 #endif  // HEADERS_NOTEBOOK_H_

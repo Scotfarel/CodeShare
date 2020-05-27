@@ -1,6 +1,6 @@
 ﻿#include "headers/NoteBook.h"
 #include "headers/ui_NoteBook.h"
-#include "headers/MyQTextEdit.h"
+#include "headers/TextEditor.h"
 #include <QLineEdit>
 #include <QTextStream>
 #include <QMessageBox>
@@ -14,38 +14,38 @@
 using json = nlohmann::json;
 typedef std::pair<int, int> sId;
 
-NoteBook::NoteBook(myClient *client, QWidget *parent) : QMainWindow(parent), ui(new Ui::NoteBook),
-                                                        _client(client) {
-    ui->setupUi(this);
-    connect(_client, &myClient::insertSymbol, this, &NoteBook::showSymbol);
-    connect(_client, &myClient::eraseSymbols, this, &NoteBook::eraseSymbols);
-    connect(_client, &myClient::insertSymbols, this, &NoteBook::showSymbolsAt);
-    connect(_client, &myClient::removeRemoteCursor, ui->RealTextEdit, &MyQTextEdit::removeRemoteCursor);
-    connect(_client, &myClient::changeRemoteCursor, ui->RealTextEdit, &MyQTextEdit::changeRemoteCursor);
-    connect(&ui->RealTextEdit->timer, &QTimer::timeout, ui->RealTextEdit, &MyQTextEdit::hideHorizontalRect);
-    connect(_client, &myClient::statusChanged, this, &NoteBook::goodbyeClient);
+NoteBook::NoteBook(ClientConnector *client, QWidget *parent) : QMainWindow(parent), UI(new Ui::NoteBook),
+                                                               _client(client) {
+    UI->setupUi(this);
+    connect(_client, &ClientConnector::insertSymbol, this, &NoteBook::show_sym);
+    connect(_client, &ClientConnector::eraseSymbols, this, &NoteBook::erase_sym);
+    connect(_client, &ClientConnector::insertSymbols, this, &NoteBook::show_sym_in_pos);
+    connect(_client, &ClientConnector::removeRemoteCursor, UI->RealTextEdit, &TextEditor::removeRemoteCursor);
+    connect(_client, &ClientConnector::changeRemoteCursor, UI->RealTextEdit, &TextEditor::changeRemoteCursor);
+    connect(&UI->RealTextEdit->timer, &QTimer::timeout, UI->RealTextEdit, &TextEditor::hideHorizontalRect);
+    connect(_client, &ClientConnector::statusChanged, this, &NoteBook::end_session);
 
     setupFirstLetter();
     setupTextEdit();
-    cursorChangeRequest(0);
+    cursor_change_req(0);
     qRegisterMetaType<std::vector<symbol>>("std::vector<symbol>");
     qRegisterMetaType<myCollabColorsMap>("std::map<std::string,std::pair<std::string,bool>");
-    showSymbolsAt(0, _client->Crdt.getSymbols());
+    show_sym_in_pos(0, _client->Crdt.getSymbols());
     this->installEventFilter(this);
-    ui->RealTextEdit->installEventFilter(this);
+    UI->RealTextEdit->installEventFilter(this);
 }
 
 void NoteBook::setupTextEdit() {
-    ui->RealTextEdit->setFontPointSize(14);
-    ui->RealTextEdit->setFontFamily("Times New Roman");
-    ui->RealTextEdit->setAcceptDrops(false);
-    ui->RealTextEdit->setUndoRedoEnabled(false);
-    ui->RealTextEdit->document()->setDocumentMargin(50);
+    UI->RealTextEdit->setFontPointSize(14);
+    UI->RealTextEdit->setFontFamily("Times New Roman");
+    UI->RealTextEdit->setAcceptDrops(false);
+    UI->RealTextEdit->setUndoRedoEnabled(false);
+    UI->RealTextEdit->document()->setDocumentMargin(50);
 }
 
 void NoteBook::setupFirstLetter() {
     QString user = _client->getUsername();
-    ui->labelUser->setText(user);
+    UI->labelUser->setText(user);
     QChar firstLetter;
     for (int i = 0; i < user.length(); i++) {
         firstLetter = user.at(i);
@@ -57,13 +57,13 @@ void NoteBook::setupFirstLetter() {
 
 NoteBook::~NoteBook() {
     emit closeEditor();
-    delete ui;
+    delete UI;
 }
 
-void NoteBook::on_RealTextEdit_textChanged() {
-    int charCount = ui->RealTextEdit->toPlainText().count();
-    int wordCount = ui->RealTextEdit->toPlainText().split(QRegExp("(\\s|\\n|\\r)+"), QString::SkipEmptyParts).count();
-    int lineCount = ui->RealTextEdit->document()->blockCount();
+void NoteBook::real_text_change() {
+    int charCount = UI->RealTextEdit->toPlainText().count();
+    int wordCount = UI->RealTextEdit->toPlainText().split(QRegExp("(\\s|\\n|\\r)+"), QString::SkipEmptyParts).count();
+    int lineCount = UI->RealTextEdit->document()->blockCount();
     QString ZaChar = "Characters: " + QString::number(charCount);
     QString ZaLine;
     QString ZaWord = "Words: " + QString::number(wordCount);
@@ -72,9 +72,9 @@ void NoteBook::on_RealTextEdit_textChanged() {
     } else {
         ZaLine = "Lines: " + QString::number(lineCount);
     }
-    ui->label->setText(ZaChar);
-    ui->label_2->setText(ZaWord);
-    ui->label_3->setText(ZaLine);
+    UI->label->setText(ZaChar);
+    UI->label_2->setText(ZaWord);
+    UI->label_3->setText(ZaLine);
 }
 
 bool NoteBook::eventFilter(QObject *obj, QEvent *ev) {
@@ -89,23 +89,23 @@ if ((key == Qt::Key_Q) && (modifiers == Qt::ControlModifier) && QApplication::ke
             return true;
         }
         /* Trigger these shortcuts only if you are inside doc */
-        if (obj == ui->RealTextEdit) {
+        if (obj == UI->RealTextEdit) {
             if (!keyEvent->text().isEmpty()) {
                 if (keyEvent->matches(QKeySequence::Cut)) {
-                    QTextCursor cursor = ui->RealTextEdit->textCursor();
+                    QTextCursor cursor = UI->RealTextEdit->textCursor();
                     if (cursor.hasSelection()) {
                         int startIndex = cursor.selectionStart();
                         int endIndex = cursor.selectionEnd();
 
                         std::vector<sId> symbolsId = _client->Crdt.localErase(startIndex, endIndex);
 
-                        removeCharRequest(symbolsId);
+                        remove_req(symbolsId);
                     }
                     return QObject::eventFilter(obj, ev);
                 } else if (keyEvent->matches(QKeySequence::Copy)) {
                     return false;  // let the original handler handle this sequence
                 } else if (keyEvent->matches(QKeySequence::Paste)) {
-            QTextCursor cursor = ui->RealTextEdit->textCursor();
+            QTextCursor cursor = UI->RealTextEdit->textCursor();
             int pos;
             bool hasSelection = false;
 
@@ -117,9 +117,9 @@ if ((key == Qt::Key_Q) && (modifiers == Qt::ControlModifier) && QApplication::ke
                     int endIndex = cursor.selectionEnd();
                     // Update symbols of the client
                     std::vector<sId> symbolsId = _client->Crdt.localErase(startIndex, endIndex);
-                    removeCharRequest(symbolsId);
+                    remove_req(symbolsId);
                 }
-                insertCharRangeRequest(pos, hasSelection);
+                insert_range_req(pos, hasSelection);
             } catch(OperationNotSupported& ex) {
                 qDebug() << ex.what();
                 cursor.removeSelectedText();
@@ -137,7 +137,7 @@ if ((key == Qt::Key_Q) && (modifiers == Qt::ControlModifier) && QApplication::ke
                 } else if (!(key == Qt::Key_Backspace) && !(key == Qt::Key_Delete) && !(key == Qt::Key_Escape)) {
                     // Get data
                     std::pair<int, wchar_t> tuple;
-                    QTextCursor cursor = ui->RealTextEdit->textCursor();
+                    QTextCursor cursor = UI->RealTextEdit->textCursor();
                     int pos;
 
                     if (cursor.hasSelection()) {  // Remove range of characters selected
@@ -160,8 +160,8 @@ if ((key == Qt::Key_Q) && (modifiers == Qt::ControlModifier) && QApplication::ke
                         cursor.setPosition(endIndex, QTextCursor::KeepAnchor);
                         cursor.mergeCharFormat(f);
                         cursor.mergeBlockFormat(textBlockFormat);
-                        ui->RealTextEdit->mergeCurrentCharFormat(f);
-                        ui->RealTextEdit->setTextCursor(cursor);
+                        UI->RealTextEdit->mergeCurrentCharFormat(f);
+                        UI->RealTextEdit->setTextCursor(cursor);
                         cursor.endEditBlock();
 
                         // update symbols of the client
@@ -169,7 +169,7 @@ if ((key == Qt::Key_Q) && (modifiers == Qt::ControlModifier) && QApplication::ke
 
                         // Serialize data
                         json j;
-                        jsonUtility::to_json_removal_range(j, "REMOVAL_REQUEST", symbolsId);
+                        jsonTypes::to_json_removal_range(j, "REMOVAL_REQUEST", symbolsId);
                         const std::string req = j.dump();
 
                         // Send data (header and body)
@@ -184,13 +184,13 @@ if ((key == Qt::Key_Q) && (modifiers == Qt::ControlModifier) && QApplication::ke
 
                     // Serialize data
                     json j;
-                    jsonUtility::to_json_insertion(j, "INSERTION_REQUEST", s, pos);
+                    jsonTypes::to_json_insertion(j, "INSERTION_REQUEST", s, pos);
                     const std::string req = j.dump();
 
                     _client->sendRequestMsg(req);
                     return QObject::eventFilter(obj, ev);
                 } else if (key == Qt::Key_Backspace) {
-                    QTextCursor cursor = ui->RealTextEdit->textCursor();
+                    QTextCursor cursor = UI->RealTextEdit->textCursor();
                     int pos = cursor.position();
 
                     if (cursor.hasSelection()) {
@@ -201,19 +201,19 @@ if ((key == Qt::Key_Q) && (modifiers == Qt::ControlModifier) && QApplication::ke
                         cursor.setPosition(startIndex);
                         QTextBlockFormat textBlockFormat;
                         cursor.mergeBlockFormat(textBlockFormat);
-                        ui->RealTextEdit->setAlignment(textBlockFormat.alignment());
+                        UI->RealTextEdit->setAlignment(textBlockFormat.alignment());
                         cursor.setPosition(pos);
 
                         std::vector<sId> symbolsId = _client->Crdt.localErase(startIndex, endIndex);
 
-                        removeCharRequest(symbolsId);
+                        remove_req(symbolsId);
                     } else if (pos > 0) {
                         std::vector<sId> symbolsId = _client->Crdt.localErase(pos - 1, pos);
-                        removeCharRequest(symbolsId);
+                        remove_req(symbolsId);
                     }
                     return QObject::eventFilter(obj, ev);
                 } else if (key == Qt::Key_Delete) {
-                    QTextCursor cursor = ui->RealTextEdit->textCursor();
+                    QTextCursor cursor = UI->RealTextEdit->textCursor();
                     int pos = cursor.position();
 
                     if (cursor.hasSelection()) {
@@ -224,16 +224,16 @@ if ((key == Qt::Key_Q) && (modifiers == Qt::ControlModifier) && QApplication::ke
                         cursor.setPosition(cursor.selectionStart());
                         QTextBlockFormat textBlockFormat;
                         cursor.mergeBlockFormat(textBlockFormat);
-                        ui->RealTextEdit->setAlignment(textBlockFormat.alignment());
+                        UI->RealTextEdit->setAlignment(textBlockFormat.alignment());
                         cursor.setPosition(pos);
                         // Update symbols of the client
                         std::vector<sId> symbolsId = _client->Crdt.localErase(startIndex, endIndex);
 
-                        removeCharRequest(symbolsId);
-                    } else if (pos >= 0 && pos < ui->RealTextEdit->toPlainText().size()) {
+                        remove_req(symbolsId);
+                    } else if (pos >= 0 && pos < UI->RealTextEdit->toPlainText().size()) {
                         std::vector<sId> symbolsId = _client->Crdt.localErase(pos, pos + 1);
 
-                        removeCharRequest(symbolsId);
+                        remove_req(symbolsId);
                     }
                     return QObject::eventFilter(obj, ev);
                 } else if (key == Qt::Key_Escape) {
@@ -248,10 +248,10 @@ if ((key == Qt::Key_Q) && (modifiers == Qt::ControlModifier) && QApplication::ke
 }
 
 void NoteBook::on_actionClose_triggered() {
-    CloseDocumentRequest();
+    close_document_req();
 }
 
-void NoteBook::CloseDocumentRequest() {
+void NoteBook::close_document_req() {
     // Get data from the form
     QString user = this->_client->getUsername();
     QByteArray ba_user = user.toLocal8Bit();
@@ -262,23 +262,21 @@ void NoteBook::CloseDocumentRequest() {
 
     // Serialize data
     json j;
-    jsonUtility::to_jsonUri(j, "LOGOUTURI_REQUEST", c_user, c_uri);
+    jsonTypes::to_jsonUri(j, "LOGOUTURI_REQUEST", c_user, c_uri);
     const std::string req = j.dump();
 
     // Send data (header and body)
     _client->sendRequestMsg(req);
 }
 
-void NoteBook::showSymbolsAt(int firstIndex, std::vector<symbol> symbols) {
+void NoteBook::show_sym_in_pos(int startIndex, std::vector<symbol> symbols) {
     wchar_t letter;
-    int index = firstIndex;
-    QTextCursor c = ui->RealTextEdit->textCursor();
+    int index = startIndex;
+    QTextCursor c = UI->RealTextEdit->textCursor();
 
     c.beginEditBlock();
             foreach(symbol s, symbols) {
             letter = s.getLetter();
-            QTextCharFormat newFormat;
-            QTextBlockFormat newBlockFormat;
 
             int endIndex;
             int pos = index++;
@@ -291,11 +289,9 @@ void NoteBook::showSymbolsAt(int firstIndex, std::vector<symbol> symbols) {
 
                 /* Insert (formatted) char */
                 c.setPosition(pos);
-                c.setCharFormat(newFormat);
                 c.insertText(static_cast<QString>(letter));
                 c.movePosition(QTextCursor::Right);
                 c.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor);
-                c.setBlockFormat(newBlockFormat);
 
                 /* Keep current selection */
                 c.setPosition(oldPos == startIndex ? endIndex : startIndex, QTextCursor::MoveAnchor);
@@ -303,25 +299,23 @@ void NoteBook::showSymbolsAt(int firstIndex, std::vector<symbol> symbols) {
             } else {
                 /* Insert (formatted) char */
                 c.setPosition(pos);
-                c.setCharFormat(newFormat);
                 c.insertText(static_cast<QString>(letter));
                 c.movePosition(QTextCursor::Right);
                 c.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor);
-                c.setBlockFormat(newBlockFormat);
                 c.setPosition(oldPos);
             }
         }
     c.endEditBlock();
-    ui->RealTextEdit->setTextCursor(c);
+    UI->RealTextEdit->setTextCursor(c);
 }
 
-void NoteBook::showSymbol(std::pair<int, wchar_t> tuple) {
+void NoteBook::show_sym(std::pair<int, wchar_t> tuple) {
     int pos = tuple.first;
     wchar_t c = tuple.second;
     QTextCharFormat format;
     QTextBlockFormat newBlockFormat;
 
-    QTextCursor cursor = ui->RealTextEdit->textCursor();
+    QTextCursor cursor = UI->RealTextEdit->textCursor();
     cursor.beginEditBlock();
 
     int endIndex;
@@ -353,14 +347,14 @@ void NoteBook::showSymbol(std::pair<int, wchar_t> tuple) {
         cursor.setPosition(oldPos);
     }
     cursor.endEditBlock();
-    ui->RealTextEdit->setTextCursor(cursor);
+    UI->RealTextEdit->setTextCursor(cursor);
 
     qDebug() << "Written in pos: " << pos << endl;
-    ui->RealTextEdit->setFocus();
+    UI->RealTextEdit->setFocus();
 }
 
-void NoteBook::eraseSymbols(int startIndex, int endIndex) {
-    QTextCursor cursor = ui->RealTextEdit->textCursor();
+void NoteBook::erase_sym(int startIndex, int endIndex) {
+    QTextCursor cursor = UI->RealTextEdit->textCursor();
     cursor.beginEditBlock();
     cursor.setPosition(startIndex);
     int startAlignment = cursor.blockFormat().alignment();
@@ -377,25 +371,25 @@ void NoteBook::eraseSymbols(int startIndex, int endIndex) {
     cursor.endEditBlock();
 
     qDebug() << "Deleted char range" << endl;
-    ui->RealTextEdit->setFocus();
+    UI->RealTextEdit->setFocus();
 }
-void NoteBook::removeCharRequest(const std::vector<sId> &symbolsId) {
+void NoteBook::remove_req(const std::vector<sId> &symbolsId) {
     json j;
-    jsonUtility::to_json_removal_range(j, "REMOVAL_REQUEST", symbolsId);
+    jsonTypes::to_json_removal_range(j, "REMOVAL_REQUEST", symbolsId);
     const std::string req = j.dump();
     _client->sendRequestMsg(req);
 }
-void NoteBook::cursorChangeRequest(int pos) {
+void NoteBook::cursor_change_req(int pos) {
     json j;
-    jsonUtility::to_json_cursor_change_req(j, "CURSOR_CHANGE_REQUEST", pos);
+    jsonTypes::to_json_cursor_change_req(j, "CURSOR_CHANGE_REQUEST", pos);
     const std::string req = j.dump();
     _client->sendRequestMsg(req);
 }
 
-void NoteBook::insertCharRangeRequest(int pos, bool cursorHasSelection) noexcept(false) {
+void NoteBook::insert_range_req(int pos, bool cursorHasSelection) noexcept(false) {
     QClipboard *clipboard = QApplication::clipboard();
     const QMimeData *mimeData = clipboard->mimeData();
-    QTextCursor cursor = ui->RealTextEdit->textCursor();
+    QTextCursor cursor = UI->RealTextEdit->textCursor();
 
     if (mimeData->hasText() && !mimeData->hasImage() && !mimeData->hasUrls() && !mimeData->html().contains("<a href")) {
         /* Get chars from clipboard mimeData */
@@ -409,15 +403,15 @@ void NoteBook::insertCharRangeRequest(int pos, bool cursorHasSelection) noexcept
         std::vector<symbol> symbols = _client->Crdt.localInsert(initialPos, infoSymbols);
         // Serialize data
         json j;
-        std::vector<json> symFormattingVectorJSON = jsonUtility::fromFormattingSymToJson(symbols);
-        jsonUtility::to_json_insertion_range(j, "INSERTIONRANGE_REQUEST", symFormattingVectorJSON, initialPos);
+        std::vector<json> symFormattingVectorJSON = jsonTypes::fromFormattingSymToJson(symbols);
+        jsonTypes::to_json_insertion_range(j, "INSERTIONRANGE_REQUEST", symFormattingVectorJSON, initialPos);
         const std::string req = j.dump();
         _client->sendRequestMsg(req);
     } else {
         qDebug() << "Cannot paste this." << endl;
     }
 }
-void NoteBook::goodbyeClient() {
+void NoteBook::end_session() {
     if (_client->getStatus() == false) {
         QMessageBox::warning(nullptr, "Attention",
                              "Cant reach server \n\nApplication needs to be closed");

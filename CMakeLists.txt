@@ -7,17 +7,17 @@ set(CMAKE_AUTOMOC YES)
 set(SOURCES main.cpp
         src/File.cpp
         headers/File.h
-        headers/MyQTextEdit.h
-        src/MyQTextEdit.cpp
+        headers/TextEditor.h
+        src/TextEditor.cpp
         src/NoteBook.cpp
         headers/NoteBook.h
         headers/ui_NoteBook.h
-        src/jsonUtility.cpp
-        headers/jsonUtility.h
-        src/message.cpp
-        headers/message.h
-        src/myClient.cpp
-        headers/myClient.h
+        src/jsonTypes.cpp
+        headers/jsonTypes.h
+        src/Message.cpp
+        headers/Message.h
+        src/ClientConnector.cpp
+        headers/ClientConnector.h
         src/symbol.cpp
         headers/symbol.h
         json.hpp
