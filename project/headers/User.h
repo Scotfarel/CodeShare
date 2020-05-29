@@ -1,5 +1,5 @@
 //
-// Created by ivan on 5/24/20.
+// Created by ivan on 5/21/20.
 //
 
 #ifndef CODESHARE_USER_H
@@ -10,39 +10,45 @@
 #include "MsgContext.h"
 #include "Symbol.h"
 
-typedef std::pair<int,int> sId;
 
+typedef std::pair<int, int> sId;
+
+
+//  Class that contains users info
+//  Grants methods to calculate an indexes for a new symbol element
 class User {
-
 private:
-    int id;
-    std::string currentFile;
-    std::string username;
+    std::string editingText = "TextShare";
     std::vector<Symbol> symbols;
-    int cmpPosX(std::vector<int> symPos, std::pair<int,int> symId, std::vector<int> newSymPos,
-                std::pair<int,int> newSymId, int pos);
-    int cmpPos(std::vector<int> symPos, std::pair<int,int> symId, std::vector<int> newSymPos,
-               std::pair<int,int> newSymId, int pos);
+
+    //  Compare positions of symbols for correct position
+    int cmpPosX(std::vector<int> symPos, sId symId, std::vector<int> newSymPos, sId newSymId, int pos);
+
+    int cmpPos(std::vector<int> symPos, sId symId, std::vector<int> newSymPos, sId newSymId, int pos);
 
 public:
     virtual ~User() = default;
-    virtual void deliver(const MsgContext& msg) = 0;
 
-    int getId() const;
-    int getIndexById(const std::vector<Symbol>& roomSymbols, sId id);
-    std::string getCurrentFile();
-    std::string getUsername();
+    //  Function to be overrided by derived session class, pure virtual
+    virtual void deliver(const MsgContext &msg) = 0;
 
-    void setSymbols(std::vector<Symbol> symbols);
-    void setCurrentFile(std::string uri);
-    void setUsername(std::string userName);
-    void setSiteId(int edId);
+    //  Getters
+    std::string getEditingText();
 
-    int process(int type, int indexEditor, const std::vector<Symbol>& roomSymbols, const Symbol& newSymbol);
-    int process(int type, int indexEditor, const std::vector<Symbol>& roomSymbols, const std::vector<Symbol>& newSymbols);
-
-    std::string to_string();
     std::vector<Symbol> getSymbols();
+
+    //  Setters
+    void setSymbols(std::vector<Symbol> symbols);
+
+    void setEditingText(std::string textName);
+
+    //  Getting an index in symbols map for a new symbol
+    int getSymbolIndex(int indexEditor, const std::vector<Symbol> &roomSymbols, const Symbol &symbol);
+
+    int getSymbolIndexById(const std::vector<Symbol> &roomSymbols, sId id);
+
+    //  Formatting
+    std::string symbolsToString();
 };
 
 #endif //CODESHARE_USER_H

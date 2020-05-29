@@ -3,70 +3,72 @@
 //
 
 #include <MsgContext.h>
-#include <cstring>
 
-MsgContext::MsgContext() : body_size(0) {}
 
-const char *MsgContext::data() const {
-    return buf_str;
-}
+MsgContext::MsgContext() : bodySize(0), isLastChunk(false) {}
 
 char *MsgContext::getData() {
     return buf_str;
 }
 
-std::size_t MsgContext::length() const {
-    return header_length + body_size;
-}
-
-const char *MsgContext::body() const {
-    return buf_str + header_length;
+const char *MsgContext::getData() const {
+    return buf_str;
 }
 
 char *MsgContext::getBody() {
-    return buf_str + header_length;
+    return buf_str + HEADER;
+}
+
+const char *MsgContext::getBody() const {
+    return buf_str + HEADER;
+}
+
+std::size_t MsgContext::getLength() const {
+    return HEADER + bodySize;
 }
 
 std::size_t MsgContext::getBodyLength() const {
-    return body_size;
+    return bodySize;
 }
 
 void MsgContext::setBodyLength(std::size_t new_length) {
-    body_size = new_length;
+    bodySize = new_length;
 }
 
-void MsgContext::decode_header() {
-    char header[header_length + 2] = "";
-    std::strncat(header, buf_str + 1, header_length);
-    body_size = std::atoi(header);
+void MsgContext::decodeHeader() {
+    char header[HEADER + 2] = "";
+    std::strncat(header, buf_str + 1, HEADER);
+    bodySize = std::atoi(header);
     this->setLastChunk(*buf_str);
 }
 
-void MsgContext::encode_header() {
-    char header[header_length + 1] = "";
-    std::sprintf(header, "%5d", static_cast<int>(body_size));
-    std::memcpy(buf_str + 1, header, header_length);
+void MsgContext::encodeHeader() {
+    char header[HEADER + 1] = "";
+    std::sprintf(header, "%5lu", bodySize);
+    std::memcpy(buf_str + 1, header, HEADER);
 }
 
-char& MsgContext::isThisLastChunk() {
+bool MsgContext::isEnd() {
     return isLastChunk;
 }
 
-void MsgContext::setLastChunk(char val) {
-    this->isLastChunk = val;
+void MsgContext::setLastChunk(bool flag) {
+    this->isLastChunk = flag;
 }
 
-MsgContext MsgContext::constructMsg(const std::string& chunkResponse, char isLastChunk) {
-    //Send data (header and body)
+
+MsgContext MsgContext::createMessage(const std::string &chunkResponse, bool isLastChunk) {
     MsgContext msg;
     msg.setLastChunk(isLastChunk);
     msg.setBodyLength(chunkResponse.size());
-    std::memcpy(msg.getBody()+1, chunkResponse.data(), msg.getBodyLength());
+    std::memcpy(msg.getBody() + 1, chunkResponse.data(), msg.getBodyLength());
     msg.setBodyLength(chunkResponse.size());
-    msg.getBody()[msg.getBodyLength()+1] = '\0';
-    msg.encode_header();
-    std::memcpy(msg.getData(), &msg.isThisLastChunk(), 1);
+    msg.getBody()[msg.getBodyLength() + 1] = '\0';
+    msg.encodeHeader();
+    std::memcpy(msg.getData(), &msg.isLastChunk, 1);
     return msg;
 }
+
+
 
 

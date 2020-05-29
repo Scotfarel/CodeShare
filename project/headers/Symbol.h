@@ -9,22 +9,37 @@
 #include <string>
 #include <array>
 
-class Symbol {
 
+typedef std::pair<int, int> sId;
+
+
+//  Symbol is a cell of symbols map, a letter.
+//  Every symbol has his own position in a symbols vector.
+class Symbol {
 private:
     wchar_t letter{};
-    std::pair<int, int> id;
-    std::vector<int> pos;
+    sId symbolId;
+    std::vector<int> position;
 
 public:
     Symbol() = default;
-    Symbol(wchar_t character, std::pair<int, int> id, std::vector<int> pos);
-    void setLetter(wchar_t letter);
-    void setId(std::pair<int,int> id);
-    void setPos(std::vector<int> pos);
+
+    Symbol(wchar_t character, sId id, std::vector<int> pos);
+
+    // Getters
     wchar_t getLetter() const;
-    std::pair<int, int> getId() const;
-    std::vector<int> getPos() const;
+
+    sId getSymbolId() const;
+
+    std::vector<int> getPosition() const;
+
+    // Setters
+    void setLetter(wchar_t letter);
+
+    void setSymbolId(sId id);
+
+    void setPosition(std::vector<int> pos);
+
 };
 
 #endif //CODESHARE_SYMBOL_H

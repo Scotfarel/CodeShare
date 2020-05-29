@@ -6,35 +6,47 @@
 #define CODESHARE_MSGCONTEXT_H
 
 #include <string>
-#define MAX_CHUNK_SIZE 65000
+#include <cstring>
 
+#define MAX_CHUNK_SIZE 65000
+#define HEADER 5
+
+//  Class contains chars to send
 class MsgContext {
+private:
+    char buf_str[MAX_CHUNK_SIZE + HEADER + 1]{};
+    std::size_t bodySize;
+    bool isLastChunk;
 
 public:
-    enum { header_length = 5 };
-
     MsgContext();
-    static MsgContext constructMsg(const std::string& chunkResponse, char isLastChunk);
 
-    const char* data() const;
-    char* getData();
-    std::size_t length() const;
-    const char* body() const;
-    char* getBody();
+    static MsgContext createMessage(const std::string &chunkResponse, bool isLastChunk);
+
+    //  Getters
+    const char *getData() const;
+
+    char *getData();
+
+    const char *getBody() const;
+
+    char *getBody();
+
     std::size_t getBodyLength() const;
 
+    std::size_t getLength() const;
+
+    //  Setters
     void setBodyLength(std::size_t new_length);
-    void setLastChunk(char val);
 
-    void decode_header();
-    void encode_header();
+    void setLastChunk(bool flag);
 
-    char& isThisLastChunk();
+    // Serializers
+    void decodeHeader();
 
-private:
-    char buf_str[MAX_CHUNK_SIZE + header_length + 1]{};
-    std::size_t body_size;
-    char isLastChunk{};
+    void encodeHeader();
+
+    bool isEnd();
 };
 
 #endif //CODESHARE_MSGCONTEXT_H
