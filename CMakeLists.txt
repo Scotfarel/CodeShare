@@ -4,10 +4,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_INCLUDE_CURRENT_DIR "YES")
 set(CMAKE_AUTOMOC YES)
-#set(CMAKE_AUTOUIC YES)
+set(CMAKE_AUTOUIC YES)
 set(SOURCES main.cpp
-        src/File.cpp
-        headers/File.h
         headers/TextEditor.h
         src/TextEditor.cpp
         src/NoteBook.ui
@@ -19,8 +17,8 @@ set(SOURCES main.cpp
         headers/Message.h
         src/ClientConnector.cpp
         headers/ClientConnector.h
-        src/symbol.cpp
-        headers/symbol.h
+        src/Symbol.cpp
+        headers/Symbol.h
         json.hpp
         src/CRDT.cpp
         headers/CRDT.h

@@ -10,7 +10,7 @@ ClientConnector::ClientConnector(QString nickname)
           socket_(io_context_),
           username_(std::move(nickname)),
           fullBody(""),
-          Crdt(),
+          crdt(),
           room_id_() {
     worker_ = std::thread([&](){io_context_.run();});
     do_connect();
@@ -53,7 +53,7 @@ ClientConnector::~ClientConnector() {
     this->close();
     worker_.join();
 }
-int ClientConnector::get_room() {
+int ClientConnector::get_room() const {
     return room_id_;
 }
 void ClientConnector::do_connect() {
@@ -77,7 +77,7 @@ void ClientConnector::do_read_header() {
     memset(read_msg_.data(), 0, read_msg_.length() + 1);  // VERY IMPORTANT, otherwise rubbish remains inside socket!
     boost::asio::async_read(socket_,
                             boost::asio::buffer(read_msg_.data(), Message::header_length + 1),
-                            [this](boost::system::error_code ec, std::size_t /*length*/) {
+                            [this](boost::system::error_code ec, std::size_t) {
         if (!ec) {
             read_msg_.decode_header();
             do_read_body();
@@ -96,99 +96,99 @@ void ClientConnector::do_read_body() {
             read_msg_.data()[read_msg_.length()+1] = '\0';
             fullBody.append(read_msg_.body()+1);
 
-            if (read_msg_.isThisLastChunk() == '0') {
+            if (read_msg_.is_last_chunk() == '0') {
                 do_read_header();
                 return;
             }
-            std::string opJSON;
+            std::string operation_JSON;
             try {
                 json jdata_in = json::parse(fullBody);
-                jsonTypes::from_json(jdata_in, opJSON);
+                jsonTypes::from_json(jdata_in, operation_JSON);
 
-                 if (opJSON == "DISCONNECT_RESPONSE") {
-                    std::string db_responseJSON;
-                    jsonTypes::from_json_resp(jdata_in, db_responseJSON);
+                 if (operation_JSON == "DISCONNECT_RESPONSE") {
+                    std::string response_JSON;
+                    jsonTypes::from_json_resp(jdata_in, response_JSON);
 
-                    if (db_responseJSON == "LOGOUT_OK") {
+                    if (response_JSON == "LOGOUT_OK") {
                         emit opResultSuccess("DISCONNECT_SUCCESS");
                     } else {
                         emit opResultFailure("DISCONNECT_FAILURE");
                     }
-                } else if (opJSON == "INSERTION_RESPONSE") {
-                    symbol symbolJSON;
+                } else if (operation_JSON == "INSERTION_RESPONSE") {
+                    Symbol symbolJSON;
                     int indexEditorJSON;
                     jsonTypes::from_json_insertion(jdata_in, symbolJSON, indexEditorJSON);
-                    int newIndex = this->Crdt.process(0, indexEditorJSON, symbolJSON);
+                    int newIndex = this->crdt.process(0, indexEditorJSON, symbolJSON);
 
-                    std::pair<int, wchar_t> tuple = std::make_pair(newIndex, symbolJSON.getLetter());
+                    std::pair<int, wchar_t> tuple = std::make_pair(newIndex, symbolJSON.get_letter());
                     emit insertSymbol(tuple);
-                } else if (opJSON == "CREATE_ROOM_RESPONSE") {  // CREATE ROOM
-                     std::string responseJson;
-                     jsonTypes::from_json_resp(jdata_in, responseJson);
+                } else if (operation_JSON == "CREATE_ROOM_RESPONSE") {  // CREATE ROOM
+                     std::string response_JSON;
+                     jsonTypes::from_json_resp(jdata_in, response_JSON);
 
-                     if(responseJson == "CREATE_ROOM_OK") {
+                     if(response_JSON == "CREATE_ROOM_OK") {
                          int room_id;
                          jsonTypes::from_jsonUri(jdata_in, room_id);  // get json value and put into JSON variables
                          // Update client data
                          this->set_room(room_id);
-                         this->Crdt.setSymbols(std::vector<symbol>());
+                         this->crdt.set_symbols(std::vector<Symbol>());
                          emit opResultSuccess("CREATE_ROOM_SUCCESS");
                      } else
                              emit opResultFailure("CREATE_ROOM_FAILURE");
-                 } else if (opJSON == "JOIN_ROOM_RESPONSE") {  // JOIN ROOM
+                 } else if (operation_JSON == "JOIN_ROOM_RESPONSE") {  // JOIN ROOM
                      std::string responseJson;
                      int room_id;
                      jsonTypes::from_json_resp(jdata_in, responseJson);
 
                      if(responseJson == "JOIN_ROOM_OK") {
-                         std::vector<symbol> symbolsJSON;
+                         std::vector<Symbol> symbolsJSON;
                          jsonTypes::from_json_symbols(jdata_in, symbolsJSON);
                          jsonTypes::from_json_join(jdata_in, room_id);
                          this->set_room(room_id);
                          //Update client data
-                         this->Crdt.setSymbols(symbolsJSON);
+                         this->crdt.set_symbols(symbolsJSON);
                          emit opResultSuccess("JOIN_ROOM_SUCCESS");
                      } else if(responseJson == "JOIN_ROOM_EMPTY") {
                          jsonTypes::from_json_join(jdata_in, room_id);
                          this->set_room(room_id);
                          //Update client data
-                         this->Crdt.setSymbols(std::vector<symbol>());
+                         this->crdt.set_symbols(std::vector<Symbol>());
                          emit opResultSuccess("JOIN_ROOM_SUCCESS");
                      } else
                              emit opResultFailure("JOIN_ROOM_FAILURE");
-                 } else if (opJSON == "INSERTIONRANGE_RESPONSE") {
+                 } else if (operation_JSON == "INSERTIONRANGE_RESPONSE") {
                     int firstIndexJSON;
                     std::vector<json> jsonSymbols;
                     jsonTypes::from_json_insertion_range(jdata_in, firstIndexJSON, jsonSymbols);
-                    std::vector<symbol> symbols;
+                    std::vector<Symbol> symbols;
                     int newIndex = firstIndexJSON;
                     for (const auto& j :  jsonSymbols) {
-                        symbol *s = nullptr;  // do not remember to delete it! (keyword 'delete')
+                        Symbol *s = nullptr;  // do not remember to delete it! (keyword 'delete')
                         s = jsonTypes::from_json_symbol(j);
                         if (!s) {
                             emitMsgInCorrectWindow();  // show error
                             do_read_header();
                         }
                         symbols.push_back(*s);
-                        newIndex = this->Crdt.process(0, newIndex, *s);
-                        std::pair<int, wchar_t> tuple = std::make_pair(newIndex, s->getLetter());
+                        newIndex = this->crdt.process(0, newIndex, *s);
+                        std::pair<int, wchar_t> tuple = std::make_pair(newIndex, s->get_letter());
                         emit insertSymbol(tuple);
                         delete s;
                     }
-                } else if (opJSON == "CURSOR_CHANGE_RESPONSE") {
+                } else if (operation_JSON == "CURSOR_CHANGE_RESPONSE") {
                     std::string usernameJSON;
                     std::string colorJSON;
                     int posJSON;
                     jsonTypes::from_json_cursor_change(jdata_in, usernameJSON, colorJSON, posJSON);
                     emit changeRemoteCursor(usernameJSON, colorJSON, posJSON);
-                }  else if (opJSON == "REMOVAL_RESPONSE") {
-                    std::vector<sId> symbolsId;
+                }  else if (operation_JSON == "REMOVAL_RESPONSE") {
+                    std::vector<int_pair> symbolsId;
                     jsonTypes::from_json_removal_range(jdata_in, symbolsId);
 
                     int newIndex;
-                    for (const sId& id : symbolsId) {
-                        // process received symbol and retrieve new calculated index
-                        newIndex = this->Crdt.processErase(id);
+                    for (const int_pair& id : symbolsId) {
+                        // process received Symbol and retrieve new calculated index
+                        newIndex = this->crdt.processErase(id);
                         if (newIndex != -1) {
                             emit eraseSymbols(newIndex, newIndex+1);
                         }
@@ -277,8 +277,8 @@ void ClientConnector::send_req_msg(std::string request) {
             chunkSize = (int)(request.length() % MAX_CHUNK_LENGTH);
             isLastChunk = '1';
         }
-        Message msg = Message::constructMsg(std::string(chunkResponse.begin(),
-                chunkResponse.begin() + chunkSize), isLastChunk);
+        Message msg = Message::construct_msg(std::string(chunkResponse.begin(),
+                                                         chunkResponse.begin() + chunkSize), isLastChunk);
         chunkResponse.erase(0, chunkSize);
         this->write(msg);  // deliver msg to the server
     }

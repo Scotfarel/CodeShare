@@ -1,9 +1,9 @@
 #ifndef HEADERS_NOTEBOOK_H_
 #define HEADERS_NOTEBOOK_H_
-
 #include <QMainWindow>
 #include <QTextCursor>
 #include <QComboBox>
+#include "headers/TextEditor.h"
 #include <QMetaType>
 #include "headers/jsonTypes.h"
 #include "headers/Message.h"
@@ -41,20 +41,20 @@ public slots:
     /* Удаление видимого символа */
     void erase_sym(int startIndex, int endIndex);
     /* Отображение символа на конкретной позиции */
-    void show_sym_in_pos(int startIndex, std::vector<symbol> symbols);
+    void show_sym_in_pos(int startIndex, std::vector<Symbol> symbols);
 
  private:
     Ui::NoteBook *UI;
     ClientConnector *_client;
     /* Настройки QT редактора */
-    void setupTextEdit();
-    void setupFirstLetter();
+    void setup_text_edit();
+    void setup_first_letter();
     /* Отправка запроса на вставку нескольких символов */
     void insert_range_req(int pos, bool cursorHasSelection);
     /* Отправка запроса на изменение курсора */
     void cursor_change_req(int pos);
     /* Отправка запроса на удаление символа */
-    void remove_req(const std::vector<sId>& symbolsId);
+    void remove_req(const std::vector<int_pair>& symbolsId);
 
 };
 #endif  // HEADERS_NOTEBOOK_H_

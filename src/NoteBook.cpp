@@ -1,6 +1,5 @@
 ﻿#include "headers/NoteBook.h"
 #include "ui_NoteBook.h"
-//#include "headers/TextEditor.h"
 #include <QLineEdit>
 #include <QTextStream>
 #include <QMessageBox>
@@ -12,7 +11,7 @@
 #include <QShortcut>
 
 using json = nlohmann::json;
-typedef std::pair<int, int> sId;
+typedef std::pair<int, int> int_pair;
 
 NoteBook::NoteBook(ClientConnector *client, QWidget *parent) : QMainWindow(parent), UI(new Ui::NoteBook),
                                                                _client(client) {
@@ -20,22 +19,20 @@ NoteBook::NoteBook(ClientConnector *client, QWidget *parent) : QMainWindow(paren
     connect(_client, &ClientConnector::insertSymbol, this, &NoteBook::show_sym);
     connect(_client, &ClientConnector::eraseSymbols, this, &NoteBook::erase_sym);
     connect(_client, &ClientConnector::insertSymbols, this, &NoteBook::show_sym_in_pos);
-//    connect(_client, &ClientConnector::removeRemoteCursor, UI->RealTextEdit, &TextEditor::removeRemoteCursor);
-//    connect(_client, &ClientConnector::changeRemoteCursor, UI->RealTextEdit, &TextEditor::changeRemoteCursor);
     connect(&UI->RealTextEdit->timer, &QTimer::timeout, UI->RealTextEdit, &TextEditor::hideHorizontalRect);
     connect(_client, &ClientConnector::statusChanged, this, &NoteBook::end_session);
 
-    setupFirstLetter();
-    setupTextEdit();
+    setup_first_letter();
+    setup_text_edit();
     cursor_change_req(0);
-    qRegisterMetaType<std::vector<symbol>>("std::vector<symbol>");
+    qRegisterMetaType<std::vector<Symbol>>("std::vector<Symbol>");
     qRegisterMetaType<myCollabColorsMap>("std::map<std::string,std::pair<std::string,bool>");
-    show_sym_in_pos(0, _client->Crdt.getSymbols());
+    show_sym_in_pos(0, _client->crdt.get_symbols());
     this->installEventFilter(this);
     UI->RealTextEdit->installEventFilter(this);
 }
 
-void NoteBook::setupTextEdit() {
+void NoteBook::setup_text_edit() {
     UI->RealTextEdit->setFontPointSize(14);
     UI->RealTextEdit->setFontFamily("Times New Roman");
     UI->RealTextEdit->setAcceptDrops(false);
@@ -43,7 +40,7 @@ void NoteBook::setupTextEdit() {
     UI->RealTextEdit->document()->setDocumentMargin(50);
 }
 
-void NoteBook::setupFirstLetter() {
+void NoteBook::setup_first_letter() {
     QString user = _client->get_username();
     UI->labelUser->setText(user);
     QChar firstLetter;
@@ -62,7 +59,8 @@ NoteBook::~NoteBook() {
 
 void NoteBook::real_text_change() {
     int charCount = UI->RealTextEdit->toPlainText().count();
-    int wordCount = UI->RealTextEdit->toPlainText().split(QRegExp("(\\s|\\n|\\r)+"), QString::SkipEmptyParts).count();
+    int wordCount = UI->RealTextEdit->toPlainText().split(QRegExp("(\\s|\\n|\\r)+"),
+            QString::SkipEmptyParts).count();
     int lineCount = UI->RealTextEdit->document()->blockCount();
     QString ZaChar = "Characters: " + QString::number(charCount);
     QString ZaLine;
@@ -93,7 +91,7 @@ bool NoteBook::eventFilter(QObject *obj, QEvent *ev) {
                         int startIndex = cursor.selectionStart();
                         int endIndex = cursor.selectionEnd();
 
-                        std::vector<sId> symbolsId = _client->Crdt.localErase(startIndex, endIndex);
+                        std::vector<int_pair> symbolsId = _client->crdt.localErase(startIndex, endIndex);
 
                         remove_req(symbolsId);
                     }
@@ -112,7 +110,7 @@ bool NoteBook::eventFilter(QObject *obj, QEvent *ev) {
                     int startIndex = cursor.selectionStart();
                     int endIndex = cursor.selectionEnd();
                     // Update symbols of the client
-                    std::vector<sId> symbolsId = _client->Crdt.localErase(startIndex, endIndex);
+                    std::vector<int_pair> symbolsId = _client->crdt.localErase(startIndex, endIndex);
                     remove_req(symbolsId);
                 }
                 insert_range_req(pos, hasSelection);
@@ -159,9 +157,8 @@ bool NoteBook::eventFilter(QObject *obj, QEvent *ev) {
                         UI->RealTextEdit->mergeCurrentCharFormat(f);
                         UI->RealTextEdit->setTextCursor(cursor);
                         cursor.endEditBlock();
-
                         // update symbols of the client
-                        std::vector<sId> symbolsId = _client->Crdt.localErase(startIndex, endIndex);
+                        std::vector<int_pair> symbolsId = _client->crdt.localErase(startIndex, endIndex);
 
                         // Serialize data
                         json j;
@@ -176,7 +173,7 @@ bool NoteBook::eventFilter(QObject *obj, QEvent *ev) {
                     // update textedit formats
                     wchar_t c = keyEvent->text().toStdWString().c_str()[0];
                     // update symbols of the client
-                    symbol s = _client->Crdt.localInsert(pos, c);
+                    Symbol s = _client->crdt.localInsert(pos, c);
 
                     // Serialize data
                     json j;
@@ -200,11 +197,11 @@ bool NoteBook::eventFilter(QObject *obj, QEvent *ev) {
                         UI->RealTextEdit->setAlignment(textBlockFormat.alignment());
                         cursor.setPosition(pos);
 
-                        std::vector<sId> symbolsId = _client->Crdt.localErase(startIndex, endIndex);
+                        std::vector<int_pair> symbolsId = _client->crdt.localErase(startIndex, endIndex);
 
                         remove_req(symbolsId);
                     } else if (pos > 0) {
-                        std::vector<sId> symbolsId = _client->Crdt.localErase(pos - 1, pos);
+                        std::vector<int_pair> symbolsId = _client->crdt.localErase(pos - 1, pos);
                         remove_req(symbolsId);
                     }
                     return QObject::eventFilter(obj, ev);
@@ -223,11 +220,11 @@ bool NoteBook::eventFilter(QObject *obj, QEvent *ev) {
                         UI->RealTextEdit->setAlignment(textBlockFormat.alignment());
                         cursor.setPosition(pos);
                         // Update symbols of the client
-                        std::vector<sId> symbolsId = _client->Crdt.localErase(startIndex, endIndex);
+                        std::vector<int_pair> symbolsId = _client->crdt.localErase(startIndex, endIndex);
 
                         remove_req(symbolsId);
                     } else if (pos >= 0 && pos < UI->RealTextEdit->toPlainText().size()) {
-                        std::vector<sId> symbolsId = _client->Crdt.localErase(pos, pos + 1);
+                        std::vector<int_pair> symbolsId = _client->crdt.localErase(pos, pos + 1);
 
                         remove_req(symbolsId);
                     }
@@ -243,14 +240,14 @@ bool NoteBook::eventFilter(QObject *obj, QEvent *ev) {
     return false;  // or return QObject::eventFilter(obj, ev);
 }
 
-void NoteBook::show_sym_in_pos(int startIndex, std::vector<symbol> symbols) {
+void NoteBook::show_sym_in_pos(int startIndex, std::vector<Symbol> symbols) {
     wchar_t letter;
     int index = startIndex;
     QTextCursor c = UI->RealTextEdit->textCursor();
 
     c.beginEditBlock();
-            foreach(symbol s, symbols) {
-            letter = s.getLetter();
+            foreach(Symbol s, symbols) {
+            letter = s.get_letter();
 
             int endIndex;
             int pos = index++;
@@ -347,7 +344,7 @@ void NoteBook::erase_sym(int startIndex, int endIndex) {
     qDebug() << "Deleted char range" << endl;
     UI->RealTextEdit->setFocus();
 }
-void NoteBook::remove_req(const std::vector<sId> &symbolsId) {
+void NoteBook::remove_req(const std::vector<int_pair> &symbolsId) {
     json j;
     jsonTypes::to_json_removal_range(j, "REMOVAL_REQUEST", symbolsId,_client->get_room());
     const std::string req = j.dump();
@@ -370,11 +367,11 @@ void NoteBook::insert_range_req(int pos, bool cursorHasSelection) noexcept(false
         int numChars = mimeData->text().size();  // number of chars = number of iterations
         std::wstring str_to_paste = mimeData->text().toStdWString();
 
-        std::vector<symbol> infoSymbols;  // temporary vector without symbol pos (it will be used by the process)
+        std::vector<Symbol> infoSymbols;  // temporary vector without Symbol pos (it will be used by the process)
         int index;
         wchar_t c;
         int initialPos = pos;
-        std::vector<symbol> symbols = _client->Crdt.localInsert(initialPos, infoSymbols);
+        std::vector<Symbol> symbols = _client->crdt.localInsert(initialPos, infoSymbols);
         // Serialize data
         json j;
         std::vector<json> symFormattingVectorJSON = jsonTypes::fromFormattingSymToJson(symbols);

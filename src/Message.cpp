@@ -31,11 +31,11 @@ void Message::body_length(std::size_t new_length) {
     body_length_ = new_length;
 }
 
-char &Message::isThisLastChunk() {
+char &Message::is_last_chunk() {
     return isLastChunk;
 }
 
-void Message::setLastChunk(char val) {
+void Message::set_last_chunk(char val) {
     this->isLastChunk = val;
 }
 
@@ -43,7 +43,7 @@ void Message::decode_header() {
     char header[header_length + 2] = "";
     std::strncat(header, data_ + 1, header_length);
     body_length_ = std::atoi(header);
-    this->setLastChunk(*data_);
+    this->set_last_chunk(*data_);
 }
 
 void Message::encode_header() {
@@ -52,14 +52,14 @@ void Message::encode_header() {
     std::memcpy(data_ + 1, header, header_length);
 }
 
-Message Message::constructMsg(const std::string &chunkRequest, char isLastChunk) {
+Message Message::construct_msg(const std::string &chunkResponse, char isLastChunk) {
     Message msg;
-    msg.setLastChunk(isLastChunk);
-    msg.body_length(chunkRequest.size());
-    std::memcpy(msg.body() + 1, chunkRequest.data(), msg.body_length());
-    msg.body_length(chunkRequest.size());
+    msg.set_last_chunk(isLastChunk);
+    msg.body_length(chunkResponse.size());
+    std::memcpy(msg.body() + 1, chunkResponse.data(), msg.body_length());
+    msg.body_length(chunkResponse.size());
     msg.body()[msg.body_length() + 1] = '\0';
     msg.encode_header();
-    std::memcpy(msg.data(), &msg.isThisLastChunk(), 1);
+    std::memcpy(msg.data(), &msg.is_last_chunk(), 1);
     return msg;
 }

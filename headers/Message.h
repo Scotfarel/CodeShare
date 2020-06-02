@@ -18,9 +18,9 @@ class Message {
     void decode_header();
     void encode_header();
     void reset_data();
-    char& isThisLastChunk();
-    void setLastChunk(char val);
-    static Message constructMsg(const std::string& chunkResponse, char isLastChunk);
+    char& is_last_chunk();
+    void set_last_chunk(char val);
+    static Message construct_msg(const std::string& chunkResponse, char isLastChunk);
 
  private:
     char data_[MAX_CHUNK_LENGTH + header_length + 1];

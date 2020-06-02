@@ -10,15 +10,14 @@
 #include "headers/Message.h"
 #include <deque>
 #include "headers/jsonTypes.h"
-#include "headers/symbol.h"
-#include "headers/File.h"
+#include "headers/Symbol.h"
 #include <QDebug>
 #include <iostream>
 #include "headers/CRDT.h"
 
 using boost::asio::ip::tcp;
 typedef std::deque<Message> message_queue;
-typedef std::pair<int, int> sId;
+typedef std::pair<int, int> int_pair;
 
 class ClientConnector : public QObject {
     Q_OBJECT
@@ -26,7 +25,7 @@ class ClientConnector : public QObject {
  public:
     ClientConnector(QString);
     virtual ~ClientConnector();
-    CRDT Crdt;
+    CRDT crdt;
     void do_connect();
     void room_choice();
     void create_room();
@@ -34,7 +33,7 @@ class ClientConnector : public QObject {
     bool get_status();
     QString get_username();
     void set_room(int room_id);
-    int get_room();
+    int get_room() const;
     void close();
     void write(const Message& msg);
     void send_req_msg(std::string request);
@@ -47,9 +46,8 @@ class ClientConnector : public QObject {
     void opResultFailure(QString result);
     void editorResultSuccess(QString result, std::string filename = "");
     void editorResultFailure(QString result);
-    void listFileResult(std::vector<File> files);
     void insertSymbol(std::pair<int, wchar_t> tuple);
-    void insertSymbols(int firstIndex, std::vector<symbol> symbols);
+    void insertSymbols(int firstIndex, std::vector<Symbol> symbols);
     void eraseSymbols(int startIndex, int endIndex);
     void jsonMsgFailure(QString windowName, QString msg);
     void removeRemoteCursor(std::string username);
