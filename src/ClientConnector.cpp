@@ -2,27 +2,63 @@
 #include <qtextcodec.h>
 #include <QMessageBox>
 #include <QtWidgets/QApplication>
+#include <utility>
 typedef std::deque<Message> message_queue;
-ClientConnector::ClientConnector()
+ClientConnector::ClientConnector(QString nickname)
         : work_(new boost::asio::io_context::work(io_context_)),
           resolver_(io_context_),
           socket_(io_context_),
-          username_(""),
+          username_(std::move(nickname)),
           fullBody(""),
           Crdt(),
-          fileVector_(std::vector<File>()) {
+          room_id_() {
     worker_ = std::thread([&](){io_context_.run();});
     do_connect();
 }
-
+void ClientConnector::room_choice() {
+   int choice,id;
+    std::cout<<"Enter 1 to create room or enter  2  to join existing room:"<<std::endl;
+    std::cin>>choice;
+    switch (choice) {
+        case 1: {
+            this->create_room();
+            break;
+        }
+        case 2: {
+            std::cout << "Enter room id to join existing room:" << std::endl;
+            std::cin >> id;
+            this->join_room(id);
+            break;
+        }
+    }
+}
+void ClientConnector::create_room(){
+    //Serialize data
+    json j;
+    jsonTypes::to_json(j, "CREATE_ROOM_REQUEST");
+    const std::string req = j.dump();
+    //Send data (header and body)
+    this->send_req_msg(req);
+}
+void ClientConnector::join_room(int id){
+    //Serialize data
+    json j;
+    jsonTypes::to_json_join_room(j, "JOIN_ROOM_REQUEST", id);
+    const std::string req = j.dump();
+    //Send data (header and body)
+    this->send_req_msg(req);
+}
 ClientConnector::~ClientConnector() {
     work_.reset();
     this->close();
     worker_.join();
 }
-
+int ClientConnector::get_room() {
+    return room_id_;
+}
 void ClientConnector::do_connect() {
     auto endpoints = resolver_.resolve("127.0.0.1", "63506");
+    room_choice();
     boost::asio::async_connect(socket_, endpoints,
                                [this](boost::system::error_code ec, const tcp::endpoint&) {
        if (!ec) {
@@ -47,7 +83,7 @@ void ClientConnector::do_read_header() {
             do_read_body();
         } else {
             qDebug() << ec.message().c_str() << endl;
-            closeConnection();
+            close_connection();
         }
     });
 }
@@ -57,7 +93,7 @@ void ClientConnector::do_read_body() {
                             boost::asio::buffer(read_msg_.body()+1, read_msg_.body_length()),
                             [this](boost::system::error_code ec, std::size_t /*length*/) {
         if (!ec) {
-            read_msg_.data()[read_msg_.length()+1] = '\0';  // VERY IMPORTANT: this removes any possible letters after data
+            read_msg_.data()[read_msg_.length()+1] = '\0';
             fullBody.append(read_msg_.body()+1);
 
             if (read_msg_.isThisLastChunk() == '0') {
@@ -78,50 +114,7 @@ void ClientConnector::do_read_body() {
                     } else {
                         emit opResultFailure("DISCONNECT_FAILURE");
                     }
-                } else if (opJSON == "LOGOUTURI_RESPONSE") {
-                    std::string db_responseJSON;
-                    jsonTypes::from_json_resp(jdata_in, db_responseJSON);
-
-                    if (db_responseJSON == "LOGOUTURI_OK") {
-                        emit editorResultSuccess("LOGOUTURI_SUCCESS");
-                    } else {
-                        emit editorResultFailure("LOGOUTURI_FAILURE");
-                    }
-                } else if (opJSON == "NEWFILE_RESPONSE") {
-                    std::string db_responseJSON;
-                    jsonTypes::from_json_resp(jdata_in, db_responseJSON);
-
-                    if (db_responseJSON == "NEWFILE_OK") {
-                        std::string uriJSON;
-                        jsonTypes::from_jsonUri(jdata_in, uriJSON);  // get json value and put into JSON variables
-                        QString uriQString = QString::fromUtf8(uriJSON.data(), uriJSON.size());
-
-                        // Update client data
-                        this->setFileURI(uriQString);
-                        this->Crdt.setSymbols(std::vector<symbol>());
-                        emit opResultSuccess("NEWFILE_SUCCESS");
-                    } else {
-                        emit opResultFailure("NEWFILE_FAILURE");
-                    }
-                } else if (opJSON == "OPENFILE_RESPONSE") {
-                    std::string db_responseJSON;
-                    jsonTypes::from_json_resp(jdata_in, db_responseJSON);
-
-                    if (db_responseJSON == "OPENFILE_OK") {
-                        std::vector<symbol> symbolsJSON;
-                        jsonTypes::from_json_symbols(jdata_in, symbolsJSON);
-
-                        this->Crdt.setSymbols(symbolsJSON);
-
-                        emit opResultSuccess("OPENFILE_SUCCESS");
-                    } else if (db_responseJSON == "OPENFILE_FILE_EMPTY") {
-                        // Update client data
-                        this->Crdt.setSymbols(std::vector<symbol>());
-                        emit opResultSuccess("OPENFILE_SUCCESS");
-                    } else {
-                        emit opResultFailure("OPENFILE_FAILURE");
-                    }
-                }  else if (opJSON == "INSERTION_RESPONSE") {
+                } else if (opJSON == "INSERTION_RESPONSE") {
                     symbol symbolJSON;
                     int indexEditorJSON;
                     jsonTypes::from_json_insertion(jdata_in, symbolJSON, indexEditorJSON);
@@ -129,7 +122,41 @@ void ClientConnector::do_read_body() {
 
                     std::pair<int, wchar_t> tuple = std::make_pair(newIndex, symbolJSON.getLetter());
                     emit insertSymbol(tuple);
-                } else if (opJSON == "INSERTIONRANGE_RESPONSE") {
+                } else if (opJSON == "CREATE_ROOM_RESPONSE") {  // CREATE ROOM
+                     std::string responseJson;
+                     jsonTypes::from_json_resp(jdata_in, responseJson);
+
+                     if(responseJson == "CREATE_ROOM_OK") {
+                         int room_id;
+                         jsonTypes::from_jsonUri(jdata_in, room_id);  // get json value and put into JSON variables
+                         // Update client data
+                         this->set_room(room_id);
+                         this->Crdt.setSymbols(std::vector<symbol>());
+                         emit opResultSuccess("CREATE_ROOM_SUCCESS");
+                     } else
+                             emit opResultFailure("CREATE_ROOM_FAILURE");
+                 } else if (opJSON == "JOIN_ROOM_RESPONSE") {  // JOIN ROOM
+                     std::string responseJson;
+                     int room_id;
+                     jsonTypes::from_json_resp(jdata_in, responseJson);
+
+                     if(responseJson == "JOIN_ROOM_OK") {
+                         std::vector<symbol> symbolsJSON;
+                         jsonTypes::from_json_symbols(jdata_in, symbolsJSON);
+                         jsonTypes::from_json_join(jdata_in, room_id);
+                         this->set_room(room_id);
+                         //Update client data
+                         this->Crdt.setSymbols(symbolsJSON);
+                         emit opResultSuccess("JOIN_ROOM_SUCCESS");
+                     } else if(responseJson == "JOIN_ROOM_EMPTY") {
+                         jsonTypes::from_json_join(jdata_in, room_id);
+                         this->set_room(room_id);
+                         //Update client data
+                         this->Crdt.setSymbols(std::vector<symbol>());
+                         emit opResultSuccess("JOIN_ROOM_SUCCESS");
+                     } else
+                             emit opResultFailure("JOIN_ROOM_FAILURE");
+                 } else if (opJSON == "INSERTIONRANGE_RESPONSE") {
                     int firstIndexJSON;
                     std::vector<json> jsonSymbols;
                     jsonTypes::from_json_insertion_range(jdata_in, firstIndexJSON, jsonSymbols);
@@ -180,18 +207,19 @@ void ClientConnector::do_read_body() {
             }
         } else {
             qDebug() << ec.message().c_str() << endl;
-            closeConnection();
+            close_connection();
         }
     });
 }
 
 void ClientConnector::emitMsgInCorrectWindow() {
-    emit jsonMsgFailure("StartWindow", "Cant parse json");
+    emit jsonMsgFailure("NoteBook", "Cant parse json");
 }
 
 void ClientConnector::do_write() {
     boost::asio::async_write(socket_,
-                             boost::asio::buffer(write_msgs_.front().data(), write_msgs_.front().length()+1),
+                             boost::asio::buffer(write_msgs_.front().data(),
+                                     write_msgs_.front().length() + 1),
                              [this](boost::system::error_code ec, std::size_t /*length*/) {
          if (!ec) {
              qDebug() << "Sent:" << write_msgs_.front().data() << "END" << endl;
@@ -201,16 +229,18 @@ void ClientConnector::do_write() {
              }
          } else {
              qDebug() << ec.message().c_str() << endl;
-             closeConnection();
+             close_connection();
          }
      });
 }
 
-bool ClientConnector::getStatus() {
+bool ClientConnector::get_status() {
     return status;
 }
-
-void ClientConnector::closeConnection() {
+void ClientConnector::set_room(int room_id) {
+    this->room_id_=room_id;
+}
+void ClientConnector::close_connection() {
     status = false;
     emit statusChanged(status);
     socket_.close();
@@ -228,23 +258,15 @@ void ClientConnector::write(const Message& msg) {
 
 void ClientConnector::close() {
     boost::asio::post(io_context_, [this]() {
-        closeConnection();
+        close_connection();
     });
 }
 
-QString ClientConnector::getUsername() {
+QString ClientConnector::get_username() {
     return this->username_;
 }
 
-void ClientConnector::setFileURI(QString uri) {
-    this->uri_ = uri;
-}
-
-QString ClientConnector::getFileURI() {
-    return this->uri_;
-}
-
-void ClientConnector::sendRequestMsg(std::string request) {
+void ClientConnector::send_req_msg(std::string request) {
     int mod = (request.length() % MAX_CHUNK_LENGTH == 0) ? 1 : 0;
     int numChanks = (int)((request.length() / MAX_CHUNK_LENGTH) + 1 - mod);
     int chunkSize = MAX_CHUNK_LENGTH;

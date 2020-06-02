@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<UI version="4.0">
+<ui version="4.0">
  <class>NoteBook</class>
  <widget class="QMainWindow" name="NoteBook">
   <property name="geometry">
@@ -359,7 +359,7 @@ background-color: lightgrey;
                     <string notr="true">color:grey;</string>
                    </property>
                    <property name="text">
-                    <string>Caratteri: 0</string>
+                    <string>Chars: 0</string>
                    </property>
                   </widget>
                  </item>
@@ -377,7 +377,7 @@ background-color: lightgrey;
                     <string notr="true">color:grey;</string>
                    </property>
                    <property name="text">
-                    <string>Parole: 0</string>
+                    <string>Words: 0</string>
                    </property>
                   </widget>
                  </item>
@@ -395,7 +395,7 @@ background-color: lightgrey;
                     <string notr="true">color:grey;</string>
                    </property>
                    <property name="text">
-                    <string>Linee: 0</string>
+                    <string>Lines: 0</string>
                    </property>
                   </widget>
                  </item>
@@ -720,4 +720,4 @@ background-color: lightgrey;
   <include location="Risorse.qrc"/>
  </resources>
  <connections/>
-</UI>
+</ui>

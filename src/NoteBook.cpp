@@ -1,6 +1,6 @@
 ﻿#include "headers/NoteBook.h"
-#include "headers/ui_NoteBook.h"
-#include "headers/TextEditor.h"
+#include "ui_NoteBook.h"
+//#include "headers/TextEditor.h"
 #include <QLineEdit>
 #include <QTextStream>
 #include <QMessageBox>
@@ -20,8 +20,8 @@ NoteBook::NoteBook(ClientConnector *client, QWidget *parent) : QMainWindow(paren
     connect(_client, &ClientConnector::insertSymbol, this, &NoteBook::show_sym);
     connect(_client, &ClientConnector::eraseSymbols, this, &NoteBook::erase_sym);
     connect(_client, &ClientConnector::insertSymbols, this, &NoteBook::show_sym_in_pos);
-    connect(_client, &ClientConnector::removeRemoteCursor, UI->RealTextEdit, &TextEditor::removeRemoteCursor);
-    connect(_client, &ClientConnector::changeRemoteCursor, UI->RealTextEdit, &TextEditor::changeRemoteCursor);
+//    connect(_client, &ClientConnector::removeRemoteCursor, UI->RealTextEdit, &TextEditor::removeRemoteCursor);
+//    connect(_client, &ClientConnector::changeRemoteCursor, UI->RealTextEdit, &TextEditor::changeRemoteCursor);
     connect(&UI->RealTextEdit->timer, &QTimer::timeout, UI->RealTextEdit, &TextEditor::hideHorizontalRect);
     connect(_client, &ClientConnector::statusChanged, this, &NoteBook::end_session);
 
@@ -44,7 +44,7 @@ void NoteBook::setupTextEdit() {
 }
 
 void NoteBook::setupFirstLetter() {
-    QString user = _client->getUsername();
+    QString user = _client->get_username();
     UI->labelUser->setText(user);
     QChar firstLetter;
     for (int i = 0; i < user.length(); i++) {
@@ -84,10 +84,6 @@ bool NoteBook::eventFilter(QObject *obj, QEvent *ev) {
         int key = keyEvent->key();
         Qt::KeyboardModifiers modifiers = keyEvent->modifiers();
 
-if ((key == Qt::Key_Q) && (modifiers == Qt::ControlModifier) && QApplication::keyboardModifiers()) {
-            on_actionClose_triggered();
-            return true;
-        }
         /* Trigger these shortcuts only if you are inside doc */
         if (obj == UI->RealTextEdit) {
             if (!keyEvent->text().isEmpty()) {
@@ -169,11 +165,11 @@ if ((key == Qt::Key_Q) && (modifiers == Qt::ControlModifier) && QApplication::ke
 
                         // Serialize data
                         json j;
-                        jsonTypes::to_json_removal_range(j, "REMOVAL_REQUEST", symbolsId);
+                        jsonTypes::to_json_removal_range(j, "REMOVAL_REQUEST", symbolsId,_client->get_room());
                         const std::string req = j.dump();
 
                         // Send data (header and body)
-                        _client->sendRequestMsg(req);
+                        _client->send_req_msg(req);
                     } else {
                         pos = cursor.position();
                     }
@@ -184,10 +180,10 @@ if ((key == Qt::Key_Q) && (modifiers == Qt::ControlModifier) && QApplication::ke
 
                     // Serialize data
                     json j;
-                    jsonTypes::to_json_insertion(j, "INSERTION_REQUEST", s, pos);
+                    jsonTypes::to_json_insertion(j, "INSERTION_REQUEST", s, pos,_client->get_room());
                     const std::string req = j.dump();
 
-                    _client->sendRequestMsg(req);
+                    _client->send_req_msg(req);
                     return QObject::eventFilter(obj, ev);
                 } else if (key == Qt::Key_Backspace) {
                     QTextCursor cursor = UI->RealTextEdit->textCursor();
@@ -245,28 +241,6 @@ if ((key == Qt::Key_Q) && (modifiers == Qt::ControlModifier) && QApplication::ke
         }
     }
     return false;  // or return QObject::eventFilter(obj, ev);
-}
-
-void NoteBook::on_actionClose_triggered() {
-    close_document_req();
-}
-
-void NoteBook::close_document_req() {
-    // Get data from the form
-    QString user = this->_client->getUsername();
-    QByteArray ba_user = user.toLocal8Bit();
-    const char *c_user = ba_user.data();
-    QString uri = this->_client->getFileURI();
-    QByteArray ba_uri = uri.toLocal8Bit();
-    const char *c_uri = ba_uri.data();
-
-    // Serialize data
-    json j;
-    jsonTypes::to_jsonUri(j, "LOGOUTURI_REQUEST", c_user, c_uri);
-    const std::string req = j.dump();
-
-    // Send data (header and body)
-    _client->sendRequestMsg(req);
 }
 
 void NoteBook::show_sym_in_pos(int startIndex, std::vector<symbol> symbols) {
@@ -375,15 +349,15 @@ void NoteBook::erase_sym(int startIndex, int endIndex) {
 }
 void NoteBook::remove_req(const std::vector<sId> &symbolsId) {
     json j;
-    jsonTypes::to_json_removal_range(j, "REMOVAL_REQUEST", symbolsId);
+    jsonTypes::to_json_removal_range(j, "REMOVAL_REQUEST", symbolsId,_client->get_room());
     const std::string req = j.dump();
-    _client->sendRequestMsg(req);
+    _client->send_req_msg(req);
 }
 void NoteBook::cursor_change_req(int pos) {
     json j;
-    jsonTypes::to_json_cursor_change_req(j, "CURSOR_CHANGE_REQUEST", pos);
+    jsonTypes::to_json_cursor_change_req(j, "CURSOR_CHANGE_REQUEST", pos,_client->get_room());
     const std::string req = j.dump();
-    _client->sendRequestMsg(req);
+    _client->send_req_msg(req);
 }
 
 void NoteBook::insert_range_req(int pos, bool cursorHasSelection) noexcept(false) {
@@ -404,15 +378,16 @@ void NoteBook::insert_range_req(int pos, bool cursorHasSelection) noexcept(false
         // Serialize data
         json j;
         std::vector<json> symFormattingVectorJSON = jsonTypes::fromFormattingSymToJson(symbols);
-        jsonTypes::to_json_insertion_range(j, "INSERTIONRANGE_REQUEST", symFormattingVectorJSON, initialPos);
+        jsonTypes::to_json_insertion_range(j, "INSERTIONRANGE_REQUEST", symFormattingVectorJSON,
+                initialPos,_client->get_room());
         const std::string req = j.dump();
-        _client->sendRequestMsg(req);
+        _client->send_req_msg(req);
     } else {
         qDebug() << "Cannot paste this." << endl;
     }
 }
 void NoteBook::end_session() {
-    if (_client->getStatus() == false) {
+    if (!_client->get_status()) {
         QMessageBox::warning(nullptr, "Attention",
                              "Cant reach server \n\nApplication needs to be closed");
     }

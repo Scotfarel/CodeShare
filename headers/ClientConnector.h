@@ -24,17 +24,20 @@ class ClientConnector : public QObject {
     Q_OBJECT
 
  public:
-    ClientConnector();
+    ClientConnector(QString);
     virtual ~ClientConnector();
     CRDT Crdt;
     void do_connect();
-    bool getStatus();
-    QString getUsername();
-    QString getFileURI();
-    void setFileURI(QString uri);
+    void room_choice();
+    void create_room();
+    void join_room(int);
+    bool get_status();
+    QString get_username();
+    void set_room(int room_id);
+    int get_room();
     void close();
     void write(const Message& msg);
-    void sendRequestMsg(std::string request);
+    void send_req_msg(std::string request);
 
  signals:
     void statusChanged(bool);
@@ -64,12 +67,11 @@ class ClientConnector : public QObject {
     void do_read_header();
     void do_read_body();
     void do_write();
-    void closeConnection();
+    void close_connection();
     void emitMsgInCorrectWindow();
     bool status{};
     QString username_;
-    QString uri_;
-    std::vector<File> fileVector_;
+    int room_id_;
 };
 
 #endif  // HEADERS_MYCLIENT_H_

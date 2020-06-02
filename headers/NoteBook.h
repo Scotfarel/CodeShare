@@ -27,12 +27,9 @@ class NoteBook : public QMainWindow {
  public:
     explicit NoteBook(ClientConnector* client, QWidget *parent = nullptr);
     ~NoteBook();
-
 private slots:
     void real_text_change();
     bool eventFilter(QObject *obj, QEvent *ev);
-    void on_actionClose_triggered();
-    void close_document_req();
     void end_session();
 
  signals:
@@ -58,5 +55,6 @@ public slots:
     void cursor_change_req(int pos);
     /* Отправка запроса на удаление символа */
     void remove_req(const std::vector<sId>& symbolsId);
+
 };
 #endif  // HEADERS_NOTEBOOK_H_

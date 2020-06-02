@@ -1,75 +1,80 @@
 #include "headers/jsonTypes.h"
 
-void jsonTypes::to_json(json &j, const std::string &op, const std::string &resp) {
+void jsonTypes::to_json(json &j, const std::string &op, const std::string &resp, int id) {
     j = json{
             {"operation", op},
-            {"content", {{"response", resp}}}
+            {"content",   {{"response", resp}}},
+            {"room_id",   id}
     };
 }
 
-void jsonTypes::to_json(json &j, const std::string &op, const std::string &user, const std::string &pass) {
+void jsonTypes::to_json(json &j, const std::string &op) {
     j = json{
-            {"operation", op},
-            {"content", {{"username", user},
-                         {"password", pass} }}
+            {"operation", op}
     };
 }
 
-void jsonTypes::to_json_insertion(json &j, const std::string &op, const symbol &symbol, const int &indexInEditor) {
+void jsonTypes::to_json_join_room(json &j, const std::string &op, int id) {
     j = json{
             {"operation", op},
-            {"id", symbol.getId()},
-            {"pos", symbol.getPos()},
-            {"letter", symbol.getLetter()},
-            {"indexInEditor", indexInEditor}
+            {"room_id",   id}
+    };
+}
+
+void
+jsonTypes::to_json_insertion(json &j, const std::string &op, const symbol &symbol, const int &indexInEditor, int id) {
+    j = json{
+            {"operation",     op},
+            {"id",            symbol.getId()},
+            {"pos",           symbol.getPos()},
+            {"letter",        symbol.getLetter()},
+            {"indexInEditor", indexInEditor},
+            {"room_id",       id}
     };
 }
 
 void jsonTypes::to_json_FormattingSymbol(json &j, const symbol &symbol) {
     j = json{
-            {"id", symbol.getId()},
-            {"pos", symbol.getPos()},
-            {"letter", symbol.getLetter()},
+            {"id",      symbol.getId()},
+            {"pos",     symbol.getPos()},
+            {"letter",  symbol.getLetter()}
     };
 }
 
-void jsonTypes::to_json_cursor_change_req(json &j, const std::string &op, const int &index) {
-    j = json {
-            {"operation", op},
-            {"index", index}
-    };
-}
-
-void jsonTypes::to_json_removal_range(json &j, const std::string &op, const std::vector<sId> &symbolsId) {
+void jsonTypes::to_json_cursor_change_req(json &j, const std::string &op, const int &index, int id) {
     j = json{
             {"operation", op},
-            {"symbolsId", symbolsId}
+            {"index",     index},
+            {"room_id",   id}
     };
 }
 
-
-void jsonTypes::to_jsonUri(json &j, const std::string &op, const std::string &user, const std::string &uri) {
+void jsonTypes::to_json_removal_range(json &j, const std::string &op, const std::vector<sId> &symbolsId, int id) {
     j = json{
             {"operation", op},
-            {"content", {{"username", user},
-                         {"uri", uri}}}
+            {"symbolsId", symbolsId},
+            {"room_id",   id}
     };
 }
 
-void jsonTypes::to_json(json &j, const std::string &op, const std::string &user, const std::string &pass, const std::string &email) {
+
+void jsonTypes::to_jsonUri(json &j, const std::string &op, const std::string &user, int id) {
     j = json{
             {"operation", op},
             {"content", {{"username", user},
-                          {"password", pass},
-                          {"email", email} }}
+                         {"room_id", id}}
+            }
     };
 }
 
-void jsonTypes::to_json_insertion_range(json &j, const std::string &op, const std::vector<json> &symVector, const int &startIndex) {
+
+void jsonTypes::to_json_insertion_range(json &j, const std::string &op, const std::vector<json> &symVector,
+                                        const int &startIndex,int id) {
     j = json{
-            {"operation", op},
+            {"operation",           op},
             {"formattingSymVector", symVector},  // JSON vector
-            {"startIndex", startIndex}
+            {"startIndex",          startIndex},
+            {"room_id",             id}
     };
 }
 
@@ -80,16 +85,18 @@ void jsonTypes::from_json(const json &j, std::string &op) {
 void jsonTypes::from_json_resp(const json &j, std::string &resp) {
     resp = j.at("content").at("response").get<std::string>();
 }
-
+void jsonTypes::from_json_join(const json &j, int &id) {
+     id = j.at("room_id").get<int>();
+}
 /* We need to use this 'from_json' to deserialize std::vector<symbol> (see function from_json_symbols) */
-void from_json(const json& j, symbol& s) {
+void from_json(const json &j, symbol &s) {
     auto letter = j.at("letter").get<wchar_t>();
     auto id = j.at("id").get<std::pair<int, int>>();
     auto pos = j.at("pos").get<std::vector<int>>();
     s = symbol(letter, id, pos);
 }
 
-void jsonTypes::from_json_insertion(const json& j, symbol& s, int &indexInEditor) {
+void jsonTypes::from_json_insertion(const json &j, symbol &s, int &indexInEditor) {
     indexInEditor = j.at("indexInEditor").get<int>();
     auto letter = j.at("letter").get<wchar_t>();
     auto id = j.at("id").get<std::pair<int, int>>();
@@ -97,16 +104,20 @@ void jsonTypes::from_json_insertion(const json& j, symbol& s, int &indexInEditor
     s = symbol(letter, id, pos);
 }
 
-void jsonTypes::from_json_symbols(const json &j, std::vector<symbol>& symbols) {
+void jsonTypes::from_json_symbols(const json &j, std::vector<symbol> &symbols) {
     symbols = j.at("content").at("symVector").get<std::vector<symbol>>();  // use from_json previously defined
 }
 
-void jsonTypes::from_json_insertion_range(const json &j, int& firstIndex, std::vector<json>& jsonSymbols) {
+void jsonTypes::from_json_insertion_range(const json &j, int &firstIndex, std::vector<json> &jsonSymbols) {
     firstIndex = j.at("firstIndexRange").get<int>();
     jsonSymbols = j.at("symbols").get<std::vector<json>>();
 }
 
-symbol* jsonTypes::from_json_symbol(const json &j) {
+void jsonTypes::from_jsonUri(const json &j, int &id) {
+    id = j.at("content").at("uri").get<int>();
+}
+
+symbol *jsonTypes::from_json_symbol(const json &j) {
     wchar_t letter;
     std::pair<int, int> id;
     std::vector<int> pos;
@@ -117,7 +128,7 @@ symbol* jsonTypes::from_json_symbol(const json &j) {
         id = j.at("id").get<std::pair<int, int>>();
         pos = j.at("pos").get<std::vector<int>>();
     }
-    catch (json::exception& e) {
+    catch (json::exception &e) {
         std::cerr << "Message: " << e.what() << '\n' << "exception id: " << e.id << std::endl;
         return nullptr;
     }
@@ -137,26 +148,22 @@ void jsonTypes::from_json(const json &j, std::string &user, std::string &pass, s
     email = j.at("content").at("email").get<std::string>();
 }
 
-void jsonTypes::from_jsonUri(const json &j, std::string &uri) {
-    uri = j.at("content").at("uri").get<std::string>();
-}
-
-void jsonTypes::from_json_removal(const json &j, int& index) {
+void jsonTypes::from_json_removal(const json &j, int &index) {
     index = j.at("index").get<int>();
 }
 
-void jsonTypes::from_json_cursor_change(const json &j, std::string& username, std::string& color, int& pos) {
+void jsonTypes::from_json_cursor_change(const json &j, std::string &username, std::string &color, int &pos) {
     username = j.at("username").get<std::string>();
     color = j.at("color").get<std::string>();
     pos = j.at("pos").get<int>();
 }
 
-void jsonTypes::from_json_removal_range(const json &j, std::vector<sId>& symbolsId) {
+void jsonTypes::from_json_removal_range(const json &j, std::vector<sId> &symbolsId) {
     symbolsId = j.at("symbolsId").get<std::vector<sId>>();
 }
 
 
-std::vector<json> jsonTypes::fromFormattingSymToJson(const std::vector<symbol>& symbols) {
+std::vector<json> jsonTypes::fromFormattingSymToJson(const std::vector<symbol> &symbols) {
     if (symbols.empty())
         return json::array();
 
