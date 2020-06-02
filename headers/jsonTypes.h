@@ -28,7 +28,6 @@ class jsonTypes {
     static void from_json_symbols(const json &j, std::vector<Symbol> &symbols);
     static Symbol* from_json_symbol(const json &j);
     static void from_jsonUri(const json &j, int &id);
-    static void from_json(const json& j, std::string& user, std::string& pass);
     static void from_json(const json &j, std::string &user, std::string &pass, std::string &email);
     static void from_json_insertion_range(const json &j, int& firstIndex, std::vector<json>& jsonSymbols);
     static void from_json_cursor_change(const json &j, std::string& username, std::string& color, int& pos);

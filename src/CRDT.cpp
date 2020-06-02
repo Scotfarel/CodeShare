@@ -4,63 +4,63 @@
 #include <utility>
 
 std::vector<int> CRDT::generate_pos(int index) {
-    const std::vector<int> posBefore = _symbols[index - 1].get_pos();
-    const std::vector<int> posAfter = _symbols[index].get_pos();
-    return generate_pos_between(posBefore, posAfter);
+    const std::vector<int> pos_before = _symbols[index - 1].get_pos();
+    const std::vector<int> pos_after = _symbols[index].get_pos();
+    return generate_pos_between(pos_before, pos_after);
 }
 
-std::vector<int> CRDT::generate_pos_between(std::vector<int> pos1, std::vector<int> pos2, std::vector<int> newPos) {
+std::vector<int> CRDT::generate_pos_between(std::vector<int> pos1, std::vector<int> pos2, std::vector<int> new_pos) {
     int id1 = pos1.at(0);
     int id2 = pos2.at(0);
 
     if (id2 - id1 == 0) {  // [1] [1 0] or [1 0] [1 1]
-        newPos.push_back(id1);
+        new_pos.push_back(id1);
         pos1.erase(pos1.begin());
         pos2.erase(pos2.begin());
         if (pos1.empty()) {
-            newPos.push_back(pos2.front()-1);  // [1] [1 0] -> [1 -1]
-            return newPos;
+            new_pos.push_back(pos2.front() - 1);  // [1] [1 0] -> [1 -1]
+            return new_pos;
         } else {
-            return generate_pos_between(pos1, pos2, newPos);  // [1 0] [1 1] -> recall and enter third if
+            return generate_pos_between(pos1, pos2, new_pos);  // [1 0] [1 1] -> recall and enter third if
         }
     } else if (id2 - id1 > 1) {  // [0] [3]
-        newPos.push_back(pos1.front()+1);  // [0] [3] -> [1]
-        return newPos;
+        new_pos.push_back(pos1.front() + 1);  // [0] [3] -> [1]
+        return new_pos;
     } else if (id2 - id1 == 1) {  // [1] [2] or [1 1] [2]
-        newPos.push_back(id1);
+        new_pos.push_back(id1);
         pos1.erase(pos1.begin());
         if (pos1.empty()) {
-            newPos.push_back(0);  // [1] [2] -> [1 0]
-            return newPos;
+            new_pos.push_back(0);  // [1] [2] -> [1 0]
+            return new_pos;
         } else {
-            newPos.push_back(pos1.front()+1);  // [1 1] [2] -> [1 2]
-            return newPos;
+            new_pos.push_back(pos1.front() + 1);  // [1 1] [2] -> [1 2]
+            return new_pos;
         }
     }
 }
 
-int CRDT::compare_posdx(std::vector<int> curSymPos, std::pair<int, int> curSymId,
-                        std::vector<int> newSymPos, std::pair<int, int> newSymId, int posIndex) {
-    int newSymPosSize = static_cast<int>(newSymPos.size());
-    int curSymPosSize = static_cast<int>(curSymPos.size());
-    int curSymPosCurIndex = static_cast<int>(curSymPos.at(posIndex));
-    int newSymPosCurIndex = static_cast<int>(newSymPos.at(posIndex));
+int CRDT::compare_posdx(std::vector<int> cur_sym_pos, std::pair<int, int> cur_sym_id,
+                        std::vector<int> new_sym_pos, std::pair<int, int> newSymId, int posIndex) {
+    int newSymPosSize = static_cast<int>(new_sym_pos.size());
+    int curSymPosSize = static_cast<int>(cur_sym_pos.size());
+    int curSymPosCurIndex = static_cast<int>(cur_sym_pos.at(posIndex));
+    int newSymPosCurIndex = static_cast<int>(new_sym_pos.at(posIndex));
 
     if (curSymPosCurIndex < newSymPosCurIndex) {
         return 1;
     } else if (curSymPosCurIndex == newSymPosCurIndex) {
         if (newSymPosSize > posIndex + 1 &&
-            curSymPosSize <= posIndex + 1)  // newSymPos[posIndex+1] != null && curSymPos[posIndex+1] == null
+            curSymPosSize <= posIndex + 1)  // new_sym_pos[posIndex+1] != null && cur_sym_pos[posIndex+1] == null
             return 1;  // correct position found
         else if (newSymPosSize <= posIndex + 1 &&
-                 curSymPosSize > posIndex + 1)  // newSymPos[posIndex+1] == null && curSymPos[posIndex+1] != null
-            return -1;  // curSymPos > newSymPos  -> make another cycle taking the next Symbol from _symbols
+                 curSymPosSize > posIndex + 1)  // new_sym_pos[posIndex+1] == null && cur_sym_pos[posIndex+1] != null
+            return -1;  // cur_sym_pos > new_sym_pos  -> make another cycle taking the next Symbol from _symbols
         else if (newSymPosSize > posIndex + 1 &&
-                 curSymPosSize > posIndex + 1)  // newSymPos[posIndex+1] != null && curSymPos[posIndex+1] != null
-            return compare_posdx(curSymPos, curSymId, newSymPos,
+                 curSymPosSize > posIndex + 1)  // new_sym_pos[posIndex+1] != null && cur_sym_pos[posIndex+1] != null
+            return compare_posdx(cur_sym_pos, cur_sym_id, new_sym_pos,
                                  newSymId, posIndex + 1);  // call recursively this function using next index for posIndex
-        else  // newSymPos[posIndex+1] == null && curSymPos[posIndex+1] == null
-            return newSymId > curSymId ? 1 : -1;
+        else  // new_sym_pos[posIndex+1] == null && cur_sym_pos[posIndex+1] == null
+            return newSymId > cur_sym_id ? 1 : -1;
     } else {
         return -1;  // make another cycle taking the next Symbol from _symbols
     }

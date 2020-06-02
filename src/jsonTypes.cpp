@@ -114,7 +114,7 @@ void jsonTypes::from_json_insertion_range(const json &j, int &firstIndex, std::v
 }
 
 void jsonTypes::from_jsonUri(const json &j, int &id) {
-    id = j.at("content").at("uri").get<int>();
+    id = j.at("room_id").get<int>();
 }
 
 Symbol *jsonTypes::from_json_symbol(const json &j) {
@@ -134,12 +134,6 @@ Symbol *jsonTypes::from_json_symbol(const json &j) {
     }
     Symbol *s = new Symbol(letter, id, pos);
     return s;
-}
-
-
-void jsonTypes::from_json(const json &j, std::string &user, std::string &pass) {
-    user = j.at("content").at("username").get<std::string>();
-    pass = j.at("content").at("password").get<std::string>();
 }
 
 void jsonTypes::from_json(const json &j, std::string &user, std::string &pass, std::string &email) {

@@ -7,10 +7,11 @@ include_directories(project/headers)
 include_directories("${GTEST_INCLUDE_DIRS}")
 
 add_executable( tests.cpp
-        ../headers/RoomTextManager.h
-        ../headers/ClientTextManager.h
-        ../headers/TextDiff.h
-        ../headers/TextManager.h)
+        ../headers/ClientConnector.h
+        ../headers/CRDT.h
+        ../headers/jsonTypes.h
+        ../headers/NoteBook.h
+        ../headers/TextEditor.h)
 
 function(_gmock_append_debugs _endvar _library)
     if(${_library} AND ${_library}_DEBUG)

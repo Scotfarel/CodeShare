@@ -30,8 +30,8 @@ class CRDT {
     int _counter = 0;
     int _siteId;
     std::vector<int> generate_pos(int index);
-    std::vector<int> generate_pos_between(std::vector<int> pos1, std::vector<int> pos2, std::vector<int> newPos = {});
-    int compare_posdx(std::vector<int> curSymPos, std::pair<int, int> curSymId, std::vector<int> newSymPos,
+    std::vector<int> generate_pos_between(std::vector<int> pos1, std::vector<int> pos2, std::vector<int> new_pos = {});
+    int compare_posdx(std::vector<int> cur_sym_pos, std::pair<int, int> cur_sym_id, std::vector<int> new_sym_pos,
                       std::pair<int, int> newSymId, int posIndex);
     int compare_pos(std::vector<int> curSymPos, std::pair<int, int> curSymId, std::vector<int> newSymPos,
                     std::pair<int, int> newSymId, int posIndex);

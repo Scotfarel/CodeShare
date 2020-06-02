@@ -168,8 +168,6 @@ void TextEditor::addRemoteCursor(QString username, std::pair<QString, int> color
     this->remoteCursors.insert(username, std::make_pair(colorAndPos.first, colorAndPos.second));
 }
 
-
-
 void TextEditor::removeRemoteCursor(std::string username) {
     remoteCursors.remove(QString::fromStdString(username));
     this->viewport()->update();

@@ -1,17 +1,40 @@
 #include "gmock/gmock.h"
-#include "../headers/RoomTextManager.h"
-#include "../headers/ClientTextManager.h"
-#include "../headers/TextDiff.h"
+#include "../headers/ClientConnector.h"
+#include "../headers/CRDT.h"
+#include "../headers/NoteBook.h"
+#include "../headers/TextEditor.h"
+#include "../headers/jsonTypes.h"
 
 using ::testing::AtLeast;
 
-class MockClientTextManager : public ClientTextManager {
+class MockClientConnector : public ClientConnector {
 public:
     MOCK_METHOD2(updateText, bool(std::string a, std::string diff));
     MOCK_METHOD0(getString, void());
     MOCK_METHOD2(formDiff, std::map<std::string, int>(std::string cur, std::string prev));
 };
-class MockRoomTextManager : public RoomTextManager {
+class MockCRDT : public CRDT {
+public:
+    MOCK_METHOD1(addDiff, bool(std::string a));
+    MOCK_METHOD0(getString, void());
+    MOCK_METHOD0(getDiff, std::string());
+    MOCK_METHOD2(formDiff, std::map<std::string, int>(std::string cur, std::string prev));
+};
+class MockNoteBook : public NoteBook {
+public:
+    MOCK_METHOD1(addDiff, bool(std::string a));
+    MOCK_METHOD0(getString, void());
+    MOCK_METHOD0(getDiff, std::string());
+    MOCK_METHOD2(formDiff, std::map<std::string, int>(std::string cur, std::string prev));
+};
+class MockTextEditor : public TextEditor {
+public:
+    MOCK_METHOD1(addDiff, bool(std::string a));
+    MOCK_METHOD0(getString, void());
+    MOCK_METHOD0(getDiff, std::string());
+    MOCK_METHOD2(formDiff, std::map<std::string, int>(std::string cur, std::string prev));
+};
+class MockjsonTypes : public jsonTypes {
 public:
     MOCK_METHOD1(addDiff, bool(std::string a));
     MOCK_METHOD0(getString, void());

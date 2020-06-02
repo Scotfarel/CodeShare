@@ -47,6 +47,7 @@ void ClientConnector::join_room(int id){
     const std::string req = j.dump();
     //Send data (header and body)
     this->send_req_msg(req);
+    this->set_room(id);
 }
 ClientConnector::~ClientConnector() {
     work_.reset();
@@ -123,18 +124,12 @@ void ClientConnector::do_read_body() {
                     std::pair<int, wchar_t> tuple = std::make_pair(newIndex, symbolJSON.get_letter());
                     emit insertSymbol(tuple);
                 } else if (operation_JSON == "CREATE_ROOM_RESPONSE") {  // CREATE ROOM
-                     std::string response_JSON;
-                     jsonTypes::from_json_resp(jdata_in, response_JSON);
-
-                     if(response_JSON == "CREATE_ROOM_OK") {
                          int room_id;
                          jsonTypes::from_jsonUri(jdata_in, room_id);  // get json value and put into JSON variables
                          // Update client data
                          this->set_room(room_id);
                          this->crdt.set_symbols(std::vector<Symbol>());
                          emit opResultSuccess("CREATE_ROOM_SUCCESS");
-                     } else
-                             emit opResultFailure("CREATE_ROOM_FAILURE");
                  } else if (operation_JSON == "JOIN_ROOM_RESPONSE") {  // JOIN ROOM
                      std::string responseJson;
                      int room_id;
@@ -157,11 +152,11 @@ void ClientConnector::do_read_body() {
                      } else
                              emit opResultFailure("JOIN_ROOM_FAILURE");
                  } else if (operation_JSON == "INSERTIONRANGE_RESPONSE") {
-                    int firstIndexJSON;
+                    int first_index;
                     std::vector<json> jsonSymbols;
-                    jsonTypes::from_json_insertion_range(jdata_in, firstIndexJSON, jsonSymbols);
+                    jsonTypes::from_json_insertion_range(jdata_in, first_index, jsonSymbols);
                     std::vector<Symbol> symbols;
-                    int newIndex = firstIndexJSON;
+                    int newIndex = first_index;
                     for (const auto& j :  jsonSymbols) {
                         Symbol *s = nullptr;  // do not remember to delete it! (keyword 'delete')
                         s = jsonTypes::from_json_symbol(j);
@@ -180,7 +175,6 @@ void ClientConnector::do_read_body() {
                     std::string colorJSON;
                     int posJSON;
                     jsonTypes::from_json_cursor_change(jdata_in, usernameJSON, colorJSON, posJSON);
-                    emit changeRemoteCursor(usernameJSON, colorJSON, posJSON);
                 }  else if (operation_JSON == "REMOVAL_RESPONSE") {
                     std::vector<int_pair> symbolsId;
                     jsonTypes::from_json_removal_range(jdata_in, symbolsId);
@@ -190,7 +184,7 @@ void ClientConnector::do_read_body() {
                         // process received Symbol and retrieve new calculated index
                         newIndex = this->crdt.processErase(id);
                         if (newIndex != -1) {
-                            emit eraseSymbols(newIndex, newIndex+1);
+                            emit eraseSymbols(newIndex, newIndex + 1);
                         }
                     }
                 } else {
