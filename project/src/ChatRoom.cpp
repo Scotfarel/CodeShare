@@ -4,57 +4,122 @@
 
 #include <ChatRoom.h>
 
-ChatRoom &ChatRoom::getInstance() {
-    static ChatRoom room;
-    return room;
+int ChatRoom::getRoomId() {
+    return roomId;
 }
-
 
 void ChatRoom::enterRoom(const ::users &newUser) {
     usersInRoom.insert(newUser);
-    std::cout << "New user connected to room!" << std::endl;
+    newUser->setRoomId(roomId);
 }
 
 void ChatRoom::exitRoom(const ::users &user) {
     usersInRoom.erase(user);
-    std::cout << "User has left the room" << std::endl;
 }
 
-void ChatRoom::sendMessage(const MsgContext &message) {
-    recentMessages.push_back(message);
-    while (recentMessages.size() > MAX_RECENT_MSG) {
-        recentMessages.pop_front();
-    }
-    for (const auto &user: usersInRoom) {
+
+void ChatRoom::sendMsgAllExceptMe(const MsgContext &message, int clientId) {
+    for (const auto& user: usersInRoom) {
+        if (user->getId() == clientId) {
+            continue;
+        }
         user->deliver(message);
     }
 }
 
-
-std::map<std::string, std::vector<Symbol>> ChatRoom::getMap() {
-    return this->textMap;
+void ChatRoom::setTextMap(const std::vector<Symbol> &symbols) {
+    this->textMap = symbols;
 }
 
-void ChatRoom::setTextMap(const std::string &name, const std::vector<Symbol> &symbols) {
-    this->textMap[name] = symbols;
+void ChatRoom::insertTextMap(int index, const Symbol &symbol) {
+    this->textMap.insert(this->textMap.begin() + index, symbol);
 }
 
-void ChatRoom::insertTextMap(const std::string &name, int index, const Symbol &symbol) {
-    this->textMap[name].insert(this->textMap[name].begin() + index, symbol);
+void ChatRoom::eraseTextMap(int index) {
+    this->textMap.erase(this->textMap.begin() + index);
 }
 
-void ChatRoom::eraseTextMap(const std::string &name, int index) {
-    this->textMap[name].erase(this->textMap[name].begin() + index);
+void ChatRoom::updateTextMap(int index, const std::vector<Symbol> &symbols) {
+    this->textMap.insert(this->textMap.begin() + index, symbols.begin(), symbols.end());
 }
 
-void ChatRoom::updateTextMap(const std::string &name, int index, const std::vector<Symbol> &symbols) {
-    this->textMap[name].insert(this->textMap[name].begin() + index, symbols.begin(), symbols.end());
+std::vector<Symbol> ChatRoom::getTextMap() {
+    return textMap;
 }
 
-std::vector<Symbol> ChatRoom::getTextMap(const std::string &name) {
-    if (textMap.empty()) {
-        return std::vector<Symbol>();
+int ChatRoom::getIndexById(const std::vector<Symbol>& roomSymbols, std::pair<int,int> id) {
+    auto it = std::find_if(roomSymbols.begin(), roomSymbols.end(), [id](const Symbol& s) { return s.getSymbolId() == id; });
+    if (it != roomSymbols.end()) {
+        int index = it - roomSymbols.begin();
+        return index;
     }
-    return textMap.at(name);
+    return -1;
 }
 
+int ChatRoom::cmpPosX(std::vector<int> symPos, sId symId, std::vector<int> newSymPos, sId newSymId, int pos) {
+    if (symPos.at(pos) < newSymPos.at(pos)) {
+        return 1;
+    } else if (symPos.at(pos) == newSymPos.at(pos)) {
+        if (newSymPos.size() > pos + 1 && symPos.size() <= pos + 1) {
+            return 1;
+        } else if (newSymPos.size() <= pos + 1 && symPos.size() > pos + 1) {
+            return -1;
+        } else if (newSymPos.size() > pos + 1 && symPos.size() > pos + 1) {
+            return cmpPosX(symPos, symId, newSymPos, newSymId, pos + 1);
+        } else {
+            return newSymId > symId ? 1 : -1;
+        }
+    } else {
+        return -1;
+    }
+}
+
+int ChatRoom::cmpPos(std::vector<int> symPos, sId symId, std::vector<int> newSymPos, sId newSymId, int pos) {
+    if (symPos.at(pos) > newSymPos.at(pos)) {
+        return 1;
+    } else if (symPos.at(pos) == newSymPos.at(pos)) {
+        if (newSymPos.size() > pos + 1 && symPos.size() <= pos + 1) {
+            return -1;
+        } else if (newSymPos.size() <= pos + 1 && symPos.size() > pos + 1) {
+            return 1;
+        } else if (newSymPos.size() > pos + 1 && symPos.size() > pos + 1) {
+            return cmpPos(symPos, symId, newSymPos, newSymId, pos + 1);
+        } else {
+            return newSymId.first < symId.first ? 1 : -1;
+        }
+    } else {
+        return -1;
+    }
+}
+
+int ChatRoom::getSymbolIndex(int newIndexPos, const std::vector<Symbol> &symbolsMap, const Symbol &symbol) {
+    int elemIndex = 0;
+    int position = 0;
+    int nextPosIndex = symbolsMap.size();
+
+    if (symbolsMap.size() / 2 < newIndexPos) {
+        for (auto s = symbolsMap.crbegin(); s != symbolsMap.crend(); s++) {
+            nextPosIndex--;
+            int res = cmpPosX(s->getPosition(), s->getSymbolId(), symbol.getPosition(), symbol.getSymbolId(), position);
+            if (res == -1) {
+                continue;
+            } else if (res == 1) {
+                nextPosIndex++;
+                break;
+            }
+        }
+    } else {
+        for (const auto &s: symbolsMap) {
+            elemIndex++;
+            int res = cmpPos(s.getPosition(), s.getSymbolId(), symbol.getPosition(), symbol.getSymbolId(), position);
+            if (res == -1) {
+                continue;
+            } else if (res == 1) {
+                nextPosIndex = elemIndex - 1;
+                break;
+            }
+        }
+    }
+
+    return nextPosIndex;
+}

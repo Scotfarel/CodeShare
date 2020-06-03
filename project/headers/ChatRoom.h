@@ -13,22 +13,29 @@
 #include <queue>
 #include <map>
 #include <iostream>
+#include <algorithm>
 
-#include "User.h"
+#include <Connection.h>
+#include <Symbol.h>
+#include <MsgContext.h>
 
-#define MAX_RECENT_MSG 50
+class Connection;
+
+typedef std::shared_ptr<Connection> users;
 
 
-typedef std::shared_ptr<User> users;
-typedef std::deque<MsgContext> messages;
-
-
-//  Container-like class for users and their messages that contains a map of text files
-class ChatRoom {
+//  Container-like class that contains a map of text files and sending msg to users
+class ChatRoom : public std::enable_shared_from_this<ChatRoom> {
 private:
+    int roomId;
+
     std::set<users> usersInRoom;
-    messages recentMessages;
-    std::map<std::string, std::vector<Symbol>> textMap;
+    std::vector<Symbol> textMap;
+
+    //  Compare positions of symbols for correct position
+    int cmpPosX(std::vector<int> symPos, sId symId, std::vector<int> newSymPos, sId newSymId, int pos);
+
+    int cmpPos(std::vector<int> symPos, sId symId, std::vector<int> newSymPos, sId newSymId, int pos);
 
 public:
     ChatRoom() = default;
@@ -37,7 +44,9 @@ public:
 
     void operator=(ChatRoom const &) = delete;
 
-    static ChatRoom &getInstance();
+    explicit ChatRoom(int Id) : roomId(Id) {};
+
+    int getRoomId();
 
     //  Adding and deleting users in room
     void enterRoom(const ::users &newUser);
@@ -45,22 +54,22 @@ public:
     void exitRoom(const ::users &user);
 
     //  Sending messages to users
-    void sendMessage(const MsgContext &message);
+    void sendMsgAllExceptMe(const MsgContext &message, int clientId);
 
 
-    //  Interaction with map
-    std::map<std::string, std::vector<Symbol>> getMap();
+    std::vector<Symbol> getTextMap();
 
-    std::vector<Symbol> getTextMap(const std::string &name);
+    void setTextMap(const std::vector<Symbol> &symbols);
 
-    void setTextMap(const std::string &name, const std::vector<Symbol> &symbols);
+    void insertTextMap(int index, const Symbol &symbol);
 
-    void insertTextMap(const std::string &name, int index, const Symbol &symbol);
+    void eraseTextMap(int index);
 
-    void eraseTextMap(const std::string &name, int index);
+    void updateTextMap(int index, const std::vector<Symbol> &symbols);
 
-    void updateTextMap(const std::string &name, int index, const std::vector<Symbol> &symbols);
+    int getIndexById(const std::vector<Symbol> &roomSymbols, std::pair<int, int> id);
 
+    int getSymbolIndex(int newIndexPos, const std::vector<Symbol> &symbolsMap, const Symbol &symbol);
 };
 
 

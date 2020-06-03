@@ -5,43 +5,35 @@
 #ifndef CODESHARE_ROOMSCHEDULER_H
 #define CODESHARE_ROOMSCHEDULER_H
 
-#include <string>
+#include <iostream>
 #include <vector>
-#include <memory>
 
 #include <ChatRoom.h>
 
-template <class ChatRoomInterface>
+class ChatRoom;
+class Connection;
+
 class RoomScheduler {
 public:
-    RoomScheduler() = default;
-    ~RoomScheduler() = default;
-    ChatRoomInterface* createRoom(int id) { return nullptr; };
-    ChatRoomInterface* getRoom(int id);
-    bool connectToRoom(ChatRoomInterface* room);
-    bool leave();
-    void deleteRoom(int id) {};
+    static RoomScheduler& getInstance() {
+        static RoomScheduler instance;
+        return instance;
+    }
 
+    RoomScheduler(RoomScheduler const&) = delete;
+
+    void operator=(RoomScheduler const&) = delete;
+
+    std::shared_ptr<ChatRoom> createRoom();
+
+    void eraseUserFromRoom(int Id, const std::shared_ptr<Connection>& user);
+
+    std::shared_ptr<ChatRoom> getRoom(int id);
 private:
-    std::vector<ChatRoomInterface* > roomsContainer;
+    std::vector<std::shared_ptr<ChatRoom>> roomContainer;
+    int roomId;
+
+    RoomScheduler();
 };
-
-template<class ChatRoomInterface>
-bool RoomScheduler<ChatRoomInterface>::connectToRoom(ChatRoomInterface *room) {
-    room->addUser();
-    roomsContainer.push_back(room);
-    return true;
-}
-
-template<class ChatRoomInterface>
-ChatRoomInterface* RoomScheduler<ChatRoomInterface>::getRoom(int id) {
-    return roomsContainer[id];
-}
-
-template<class ChatRoomInterface>
-bool RoomScheduler<ChatRoomInterface>::leave() {
-    return false;
-}
-
 
 #endif //CODESHARE_ROOMSCHEDULER_H
