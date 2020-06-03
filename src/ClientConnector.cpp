@@ -30,6 +30,8 @@ void ClientConnector::room_choice() {
             this->join_room(id);
             break;
         }
+        default:
+            std::cout << "Invalid input:" << std::endl;
     }
 }
 void ClientConnector::create_room(){

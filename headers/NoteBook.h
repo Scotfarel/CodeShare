@@ -1,9 +1,9 @@
 #ifndef HEADERS_NOTEBOOK_H_
 #define HEADERS_NOTEBOOK_H_
+
 #include <QMainWindow>
 #include <QTextCursor>
 #include <QComboBox>
-#include "headers/TextEditor.h"
 #include <QMetaType>
 #include "headers/jsonTypes.h"
 #include "headers/Message.h"
@@ -28,7 +28,7 @@ class NoteBook : public QMainWindow {
     explicit NoteBook(ClientConnector* client, QWidget *parent = nullptr);
     ~NoteBook();
 private slots:
-    void real_text_change();
+    void on_RealTextEdit_textChanged();
     bool eventFilter(QObject *obj, QEvent *ev);
     void end_session();
 
@@ -47,8 +47,8 @@ public slots:
     Ui::NoteBook *UI;
     ClientConnector *_client;
     /* Настройки QT редактора */
-    void setup_text_edit();
-    void setup_first_letter();
+    void setupTextEdit();
+    void setupFirstLetter();
     /* Отправка запроса на вставку нескольких символов */
     void insert_range_req(int pos, bool cursorHasSelection);
     /* Отправка запроса на изменение курсора */
