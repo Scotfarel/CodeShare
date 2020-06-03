@@ -1,41 +1,29 @@
-cmake_minimum_required(VERSION 3.11)
-
-project(CodeShare)
+cmake_minimum_required(VERSION 3.13)
+project(TextShareServer)
 
 set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -std=c++0x -Wall -ggdb3")
-
-if (APPLE)
-    set(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> Scr <TARGET> <LINK_FLAGS> <OBJECTS>")
-	set(CMAKE_CXX_ARCHIVE_FINISH "<CMAKE_RANLIB> -no_warning_for_no_symbols -c <TARGET>")
-endif()
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
 
 include_directories(project/headers)
 
 set(SOURCE_DIR project/src/)
 
 set(LIB_SOURCE_FILES
-    ${SOURCE_DIR}Acceptor.cpp
-    ${SOURCE_DIR}RoomScheduler.cpp
+    ${SOURCE_DIR}Server.cpp
+    ${SOURCE_DIR}Connection.cpp
+    ${SOURCE_DIR}RequestHandler.cpp
 )
 
 add_library(project_lib STATIC ${LIB_SOURCE_FILES})
 
-enable_testing()
+add_definitions(-DBOOST_ERROR_CODE_HEADER_ONLY)
+add_executable(TextShareServer ${SOURCE_DIR}main.cpp)
 
-add_executable(CodeShare ${SOURCE_DIR}main.cpp)
-
-target_link_libraries(CodeShare project_lib)
-
-set(Boost_USE_STATIC_LIBS OFF) 
-set(Boost_USE_MULTITHREADED ON)  
-set(Boost_USE_STATIC_RUNTIME OFF) 
-find_package(Boost 1.63.0 COMPONENTS system) 
-
+find_package(Boost 1.72.0 COMPONENTS system)
 if(Boost_FOUND)
     include_directories(${Boost_INCLUDE_DIRS}) 
-    target_link_libraries(CodeShare ${Boost_LIBRARIES})
 endif()
+
+target_link_libraries(TextShareServer project_lib ${Boost_LIBRARIES})
 
 add_subdirectory(project/tests)

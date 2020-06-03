@@ -1,22 +1,10 @@
-//
-// Created by ivan on 4/15/20.
-//
+#include "Server.h"
 
-#include <iostream>
-#include "boost/asio.hpp"
+int main(int argc, char* argv[]) {
+    boost::asio::io_service io_service;
+    tcp::endpoint endpoint(tcp::v4(), std::atoi("63506"));
+    Server server(io_service, endpoint);
+    io_service.run();
 
-#include "Acceptor.hpp"
-#include "Server.hpp"
-
-int main() {
-    int port = 6666;
-    boost::asio::io_service ioService;
-    boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::tcp::v4(), port);
-
-    Acceptor acceptor(ioService, endpoint);
-
-    Server<Acceptor> server(ioService, &acceptor);
-    server.run(port);
-    server.startAccept();
-    ioService.run();
+    return 0;
 }
