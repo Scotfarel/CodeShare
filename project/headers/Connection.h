@@ -1,7 +1,10 @@
 #ifndef PROJECT_INCLUDE_CONNECTION_H_
 #define PROJECT_INCLUDE_CONNECTION_H_
 
+template<class RoomSchedulerType>
 class RequestHandler;
+
+class RoomScheduler;
 
 #include <iostream>
 #include <utility>
@@ -41,7 +44,7 @@ private:
     MsgContext messageBuffer;
     std::queue<MsgContext> messageQueue;
     std::string messageBody;
-    std::shared_ptr<RequestHandler> requestHandler;
+    std::shared_ptr<RequestHandler<RoomScheduler>> requestHandler;
 
     virtual void readHeader();
 

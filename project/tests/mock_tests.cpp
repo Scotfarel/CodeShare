@@ -3,134 +3,115 @@
 #include "gmock/gmock.h"
 #include "boost/asio.hpp"
 
-#include "Acceptor.hpp"
-#include "Server.hpp"
-#include "Connection.hpp"
-#include "ConnectionManager.hpp"
-#include "RequestHandler.hpp"
-#include "RoomScheduler.hpp"
+#include "RequestHandler.h"
+#include "RoomScheduler.h"
+#include "ConnectionManager.h"
+#include "Connection.h"
 
 using ::testing::AtLeast;
 
-class MockAcceptor : public Acceptor {
-public:
-	using Acceptor::Acceptor;
-	MOCK_METHOD1(setOption, void(bool option));
-	MOCK_METHOD0(open, void());
-	MOCK_METHOD0(bind, void());
-	MOCK_METHOD0(listen, void());
-};
-
-TEST(ServerTest, runCallOpen) {
-	boost::asio::io_service service;
-	boost::asio::ip::tcp::endpoint endpoint;
-	MockAcceptor acceptor(service, endpoint);
-	EXPECT_CALL(acceptor, open()).Times(AtLeast(1));
-
-	Server<MockAcceptor> server(service, &acceptor);
-	server.run(5000);
-}
-
-TEST(ServerTest, runCallBind) {
-	boost::asio::io_service service;
-	boost::asio::ip::tcp::endpoint endpoint;
-	MockAcceptor acceptor(service, endpoint);
-	EXPECT_CALL(acceptor, bind()).Times(AtLeast(1));
-
-	Server<MockAcceptor> server(service, &acceptor);
-	server.run(5000);
-}
-
-TEST(ServerTest, runCallListen) {
-	boost::asio::io_service service;
-	boost::asio::ip::tcp::endpoint endpoint;
-	MockAcceptor acceptor(service, endpoint);
-	EXPECT_CALL(acceptor, listen()).Times(AtLeast(1));
-
-	Server<MockAcceptor> server(service, &acceptor);
-	server.run(5000);
-}
-
-TEST(ServerTest, runCallSetOption) {
-	boost::asio::io_service service;
-	boost::asio::ip::tcp::endpoint endpoint;
-	MockAcceptor acceptor(service, endpoint);
-	bool option = true;
-	EXPECT_CALL(acceptor, setOption(option)).Times(AtLeast(1));
-
-	Server<MockAcceptor> server(service, &acceptor);
-	server.run(5000);
-}
-
-class MockConnection : public Connection<RequestHandler<RoomScheduler> > {
-public:
-	using Connection::Connection;
-	MOCK_METHOD0(start, void());
-	MOCK_METHOD0(stop, void());
-};
-
-TEST(ConnectionManagerTest, startCallConnectionStart) {
-	RoomScheduler scheduler;
-	RequestHandler<RoomScheduler> handler(&scheduler);
-	boost::asio::io_service service;
-
-	MockConnection* connection = new MockConnection(&handler, service);
-	std::shared_ptr<MockConnection> sharedConnection(connection);
-	EXPECT_CALL(*sharedConnection, start()).Times(AtLeast(1));
-
-	ConnectionManager<MockConnection> manager;
-	manager.start(sharedConnection);
-}
-
-TEST(ConnectionManagerTest, stopCallConnectionStop) {
-	RoomScheduler scheduler;
-	RequestHandler<RoomScheduler> handler(&scheduler);
-	boost::asio::io_service service;
-
-	MockConnection* connection = new MockConnection(&handler, service);
-	std::shared_ptr<MockConnection> sharedConnection(connection);
-	EXPECT_CALL(*sharedConnection, stop()).Times(AtLeast(1));
-
-	ConnectionManager<MockConnection> manager;
-	manager.stop(sharedConnection);
-}
-
-class MockRequestHandler : public RequestHandler<RoomScheduler> {
-public:
-	MockRequestHandler(RoomScheduler* scheduler) : RequestHandler<RoomScheduler>(scheduler) {}
-	MOCK_METHOD1(handleRequest, void(int request));
-};
-
-TEST(ConnectionTest, startCallHandleRequest) {
-	RoomScheduler scheduler;
-	MockRequestHandler handler(&scheduler);
-	int request = 0;
-	EXPECT_CALL(handler, handleRequest(request)).Times(AtLeast(1));
-
-	boost::asio::io_service service;
-	Connection<MockRequestHandler> connection(&handler, service);
-	connection.start();
-}
-
 class MockRoomScheduler : public RoomScheduler {
 public:
-	MOCK_METHOD0(createRoom, void());
-	MOCK_METHOD0(getRoom, void());
-	MOCK_METHOD0(connectToRoom, void());
-	MOCK_METHOD0(deleteRoom, void());
+	static MockRoomScheduler& getInstance() {
+        static MockRoomScheduler instance;
+        return instance;
+    }
+	MOCK_METHOD0(createRoom, std::shared_ptr<ChatRoom>());
+	MOCK_METHOD1(getRoom, std::shared_ptr<ChatRoom>(int id));
 };
 
-TEST(RequestHandlerTest, handlerRequestCallRoomSchedulersMethods) {
-	MockRoomScheduler scheduler;
-	EXPECT_CALL(scheduler, createRoom()).Times(AtLeast(1));
-	EXPECT_CALL(scheduler, getRoom()).Times(AtLeast(1));
-	EXPECT_CALL(scheduler, connectToRoom()).Times(AtLeast(1));
-	EXPECT_CALL(scheduler, deleteRoom()).Times(AtLeast(1));
+TEST(RequestHandlerTest, handlerRequestCallGetRoom) {
+	MockRoomScheduler& scheduler = MockRoomScheduler::getInstance();
+	EXPECT_CALL(scheduler, getRoom(0)).Times(AtLeast(1));
 
-	RequestHandler<MockRoomScheduler> handler(&scheduler);
-	for (int request = 0; request <= 3; request++) {
-		handler.handleRequest(request);
+	RequestHandler<MockRoomScheduler> handler(scheduler);
+	std::string type = "INSERTION_REQUEST";
+	json j = json{
+            {"operation", "operation"},
+        	{"id", std::make_pair(0, 0)},
+        	{"pos", std::vector<int>()},
+        	{"letter", 0},
+        	{"indexInEditor", 0},
+			{"room_id", 0}
+    };
+	int id = 0;
+	scheduler.createRoom();
+	handler.handleRequest(type, j, id);
+}
+
+TEST(RequestHandlerTest, newRoomCallCreateRoom) {
+	MockRoomScheduler& scheduler = MockRoomScheduler::getInstance();
+	EXPECT_CALL(scheduler, createRoom()).Times(AtLeast(1));
+
+	RequestHandler<MockRoomScheduler> handler(scheduler);
+	boost::asio::io_service io_service;
+	boost::asio::ip::tcp::socket socket(io_service);
+	std::shared_ptr<Connection> connection = std::make_shared<Connection>(std::move(socket));
+	handler.newRoom(connection);
+}
+
+class MockConnection : public Connection {
+public:
+	using Connection::Connection;
+	MOCK_METHOD1(start, void(int clientId));
+	MOCK_METHOD0(stop, void());
+	MOCK_METHOD0(readHeader, void());
+	MOCK_METHOD0(writeClient, void());
+
+	void mockStart() {
+		Connection::start(0);
 	}
+
+	void mockDeliver() {
+		MsgContext msg;
+		Connection::deliver(msg);
+	}
+};
+
+TEST(ConnectionManagerTest, StartCallStart) {
+	boost::asio::io_service io_service;
+	boost::asio::ip::tcp::socket socket(io_service);
+	std::shared_ptr<MockConnection> connection = std::make_shared<MockConnection>(std::move(socket));
+	EXPECT_CALL(*connection, start(0)).Times(AtLeast(1));
+
+	ConnectionManager<MockConnection>::getInstance().start(connection, 0);
+}
+
+TEST(ConnectionManagerTest, StopCallStop) {
+	boost::asio::io_service io_service;
+	boost::asio::ip::tcp::socket socket(io_service);
+	std::shared_ptr<MockConnection> connection = std::make_shared<MockConnection>(std::move(socket));
+	EXPECT_CALL(*connection, stop()).Times(AtLeast(1));
+
+	ConnectionManager<MockConnection>::getInstance().stop(connection);
+}
+
+TEST(ConnectionManagerTest, StopAllCallStop) {
+	boost::asio::io_service io_service;
+	boost::asio::ip::tcp::socket socket(io_service);
+	std::shared_ptr<MockConnection> connection = std::make_shared<MockConnection>(std::move(socket));
+	EXPECT_CALL(*connection, stop()).Times(AtLeast(1));
+
+	ConnectionManager<MockConnection>::getInstance().start(connection, 0);
+	ConnectionManager<MockConnection>::getInstance().stopAll();
+}
+
+TEST(ConnectionTest, StartCallReadHeader) {
+	boost::asio::io_service io_service;
+	boost::asio::ip::tcp::socket socket(io_service);
+	std::shared_ptr<MockConnection> connection = std::make_shared<MockConnection>(std::move(socket));
+	EXPECT_CALL(*connection, readHeader()).Times(AtLeast(1));
+
+	connection->mockStart();
+}
+
+TEST(ConnectionTest, DeliverCallWriteClient) {
+	boost::asio::io_service io_service;
+	boost::asio::ip::tcp::socket socket(io_service);
+	std::shared_ptr<MockConnection> connection = std::make_shared<MockConnection>(std::move(socket));
+	EXPECT_CALL(*connection, writeClient()).Times(AtLeast(1));
+
+	connection->mockDeliver();
 }
 
 int main(int argc, char** argv) {

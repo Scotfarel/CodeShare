@@ -4,8 +4,8 @@ using boost::asio::ip::tcp;
 using json = nlohmann::json;
 
 Connection::Connection(tcp::socket socket) : socket(std::move(socket)) {
-    RequestHandler handler(RoomScheduler::getInstance());
-    requestHandler = std::make_shared<RequestHandler>(handler);
+    RequestHandler<RoomScheduler> handler(RoomScheduler::getInstance());
+    requestHandler = std::make_shared<RequestHandler<RoomScheduler>>(handler);
 }
 
 int Connection::getId() const {
