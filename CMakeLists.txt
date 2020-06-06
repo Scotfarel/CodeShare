@@ -6,8 +6,6 @@ set(CMAKE_INCLUDE_CURRENT_DIR "YES")
 set(CMAKE_AUTOMOC YES)
 set(CMAKE_AUTOUIC YES)
 set(SOURCES main.cpp
-        headers/TextEditor.h
-        src/TextEditor.cpp
         src/NoteBook.ui
         src/NoteBook.cpp
         headers/NoteBook.h
@@ -37,7 +35,6 @@ list(APPEND LIBRARIES
         Qt5::Widgets
         Qt5::PrintSupport
         )
-
 list(REMOVE_DUPLICATES LIBRARIES)
 
 add_executable(Client ${SOURCES} ${Boost_INCLUDE_DIRS})

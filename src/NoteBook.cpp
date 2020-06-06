@@ -1,6 +1,5 @@
 ﻿#include "headers/NoteBook.h"
 #include "ui_NoteBook.h"
-#include "headers/TextEditor.h"
 #include <QLineEdit>
 #include <QTextStream>
 #include <QMessageBox>
@@ -20,9 +19,6 @@ NoteBook::NoteBook(ClientConnector *client, QWidget *parent) : QMainWindow(paren
     connect(_client, &ClientConnector::insertSymbol, this, &NoteBook::show_sym);
     connect(_client, &ClientConnector::eraseSymbols, this, &NoteBook::erase_sym);
     connect(_client, &ClientConnector::insertSymbols, this, &NoteBook::show_sym_in_pos);
-//    connect(_client, &ClientConnector::removeRemoteCursor, UI->RealTextEdit, &TextEditor::removeRemoteCursor);
-//    connect(_client, &ClientConnector::changeRemoteCursor, UI->RealTextEdit, &TextEditor::changeRemoteCursor);
-    connect(&UI->RealTextEdit->timer, &QTimer::timeout, UI->RealTextEdit, &TextEditor::hideHorizontalRect);
     connect(_client, &ClientConnector::statusChanged, this, &NoteBook::end_session);
 
     setupFirstLetter();

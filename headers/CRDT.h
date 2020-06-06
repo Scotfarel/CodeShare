@@ -14,15 +14,11 @@ class CRDT {
     Symbol localInsert(int index, wchar_t value);
     std::vector<Symbol> localInsert(int startIndex, std::vector<Symbol> symbols);
     std::vector<int_pair> localErase(int startIndex, int endIndex);
-    int process(int type, int indexEditor, Symbol newSym);
+    int process(int type, int indexEditor, const Symbol& newSym);
     int process(int type, int indexEditor, std::vector<Symbol> newSymbols);
     int processErase(int_pair id);
-    void set_vector(std::vector<Symbol> symbols);
-    void set_site_id(int id);
-    void set_counter(int counter);
     void set_symbols(std::vector<Symbol> symbols);
-    int get_counter();
-    int get_site_id();
+
     std::vector<Symbol> get_symbols();
 
  private:

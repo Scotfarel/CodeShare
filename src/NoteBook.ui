@@ -27,9 +27,6 @@
     </size>
    </property>
    <property name="styleSheet">
-    <string notr="true">#centralwidget{
-background: url(:/image/Editor/sfondo.png);
-}</string>
    </property>
    <layout class="QGridLayout" name="gridLayout">
     <property name="leftMargin">
@@ -148,7 +145,7 @@ background: url(:/image/Editor/sfondo.png);
               <number>35</number>
              </property>
              <item>
-              <widget class="TextEditor" name="RealTextEdit">
+              <widget class="QTextEdit" name="RealTextEdit">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
                  <horstretch>0</horstretch>
@@ -535,189 +532,12 @@ background-color: lightgrey;
     </item>
    </layout>
   </widget>
-  <action name="actionNew">
-   <property name="text">
-    <string>Nuovo Documento</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+N</string>
-   </property>
-  </action>
-  <action name="actionSave">
-   <property name="icon">
-    <iconset>
-     <normalon>:/image/Editor/save(1).png</normalon>
-    </iconset>
-   </property>
-   <property name="text">
-    <string>Salva</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+S</string>
-   </property>
-  </action>
+ 
   <action name="actionFullscreen">
    <property name="checkable">
     <bool>true</bool>
    </property>
-   <property name="text">
-    <string>Schermo Intero</string>
-   </property>
-   <property name="toolTip">
-    <string>Schermo Intero</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+F11</string>
-   </property>
-  </action>
-  <action name="actionAbout">
-   <property name="text">
-    <string>?</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+H</string>
-   </property>
-  </action>
-  <action name="actionClose">
-   <property name="text">
-    <string>Chiudi Documento</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+Q</string>
-   </property>
-  </action>
-  <action name="actionInvita_tramite_URI">
-   <property name="text">
-    <string>Invita tramite URI</string>
-   </property>
-  </action>
-  <action name="actionEsporta_come_PDF">
-   <property name="icon">
-    <iconset>
-     <normaloff>:/image/Editor/save(1).png</normaloff>:/image/Editor/save(1).png</iconset>
-   </property>
-   <property name="text">
-    <string>Esporta come PDF</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+S</string>
-   </property>
-  </action>
-  <action name="actionRinomina">
-   <property name="text">
-    <string>Rinomina</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+R</string>
-   </property>
-  </action>
-  <action name="actionDark_Mode">
-   <property name="icon">
-    <iconset>
-     <normaloff>:/image/Editor/DarkMoon.png</normaloff>:/image/Editor/DarkMoon.png</iconset>
-   </property>
-   <property name="text">
-    <string>Modalità Notte</string>
-   </property>
-   <property name="toolTip">
-    <string>Modalità Notte</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+D</string>
-   </property>
-  </action>
-  <action name="actionCollaboratori">
-   <property name="text">
-    <string>Nascondi Collaboratori</string>
-   </property>
-  </action>
-  <action name="actionGrassetto">
-   <property name="checkable">
-    <bool>false</bool>
-   </property>
-   <property name="icon">
-    <iconset>
-     <normaloff>:/image/Editor/v2bold.png</normaloff>:/image/Editor/v2bold.png</iconset>
-   </property>
-   <property name="text">
-    <string>Grassetto</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+B</string>
-   </property>
-  </action>
-  <action name="actionCorsivo">
-   <property name="checkable">
-    <bool>false</bool>
-   </property>
-   <property name="icon">
-    <iconset>
-     <normaloff>:/image/Editor/v2italic.png</normaloff>:/image/Editor/v2italic.png</iconset>
-   </property>
-   <property name="text">
-    <string>Corsivo</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+I</string>
-   </property>
-  </action>
-  <action name="actionSottolineato">
-   <property name="checkable">
-    <bool>false</bool>
-   </property>
-   <property name="icon">
-    <iconset>
-     <normaloff>:/image/Editor/v2underline.png</normaloff>:/image/Editor/v2underline.png</iconset>
-   </property>
-   <property name="text">
-    <string>Sottolineato</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+U</string>
-   </property>
-  </action>
-  <action name="actionEsci">
-   <property name="text">
-    <string>Esci</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+Shift+Q</string>
-   </property>
-  </action>
-  <action name="actionSeleziona_Tutto">
-   <property name="text">
-    <string>Seleziona Tutto</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+A</string>
-   </property>
-  </action>
-  <action name="actionToolbar">
-   <property name="text">
-    <string>Toolbar</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+M</string>
-   </property>
-  </action>
-  <action name="actionOpzioni">
-   <property name="text">
-    <string>Opzioni</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+O</string>
-   </property>
   </action>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>TextEditor</class>
-   <extends>QTextEdit</extends>
-   <header location="global">headers/TextEditor.h</header>
-  </customwidget>
- </customwidgets>
- <resources>
-  <include location="Risorse.qrc"/>
- </resources>
  <connections/>
 </ui>

@@ -6,7 +6,10 @@ cmake_install.cmake
 *.cbp
 Client
 /Client_autogen
+project_lib_autogen/
 CMakeCache.txt
+CTestTestfile.cmake
+
 .idea
 !core/
 *.*#

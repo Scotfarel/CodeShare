@@ -77,7 +77,7 @@ void ClientConnector::do_connect() {
 }
 
 void ClientConnector::do_read_header() {
-    memset(read_msg_.data(), 0, read_msg_.length() + 1);  // VERY IMPORTANT, otherwise rubbish remains inside socket!
+    memset(read_msg_.data(), 0, read_msg_.length() + 1);
     boost::asio::async_read(socket_,
                             boost::asio::buffer(read_msg_.data(), Message::header_length + 1),
                             [this](boost::system::error_code ec, std::size_t) {
@@ -108,16 +108,7 @@ void ClientConnector::do_read_body() {
                 json jdata_in = json::parse(fullBody);
                 jsonTypes::from_json(jdata_in, operation_JSON);
 
-                 if (operation_JSON == "DISCONNECT_RESPONSE") {
-                    std::string response_JSON;
-                    jsonTypes::from_json_resp(jdata_in, response_JSON);
-
-                    if (response_JSON == "LOGOUT_OK") {
-                        emit opResultSuccess("DISCONNECT_SUCCESS");
-                    } else {
-                        emit opResultFailure("DISCONNECT_FAILURE");
-                    }
-                } else if (operation_JSON == "INSERTION_RESPONSE") {
+                if (operation_JSON == "INSERTION_RESPONSE") {
                     Symbol symbolJSON;
                     int indexEditorJSON;
                     jsonTypes::from_json_insertion(jdata_in, symbolJSON, indexEditorJSON);
@@ -132,7 +123,7 @@ void ClientConnector::do_read_body() {
                          this->set_room(room_id);
                          this->crdt.set_symbols(std::vector<Symbol>());
                          emit opResultSuccess("CREATE_ROOM_SUCCESS");
-                 } else if (operation_JSON == "JOIN_ROOM_RESPONSE") {  // JOIN ROOM
+                } else if (operation_JSON == "JOIN_ROOM_RESPONSE") {  // JOIN ROOM
                      std::string responseJson;
                      int room_id;
                      jsonTypes::from_json_resp(jdata_in, responseJson);
@@ -153,7 +144,7 @@ void ClientConnector::do_read_body() {
                          emit opResultSuccess("JOIN_ROOM_SUCCESS");
                      } else
                              emit opResultFailure("JOIN_ROOM_FAILURE");
-                 } else if (operation_JSON == "INSERTIONRANGE_RESPONSE") {
+                } else if (operation_JSON == "INSERTIONRANGE_RESPONSE") {
                     int first_index;
                     std::vector<json> jsonSymbols;
                     jsonTypes::from_json_insertion_range(jdata_in, first_index, jsonSymbols);
